@@ -61,14 +61,14 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 
 @router.delete("/logout", summary="用户登录", response_model=SuccessResponse)
 async def logout():
-    return SuccessResponse(code="00000", data={})
+    return SuccessResponse(data={})
 
 
 # 验证码
 @router.get("/captcha", summary="验证码", response_model=SuccessResponse)
 async def root():
     result = await generate_captcha()
-    return SuccessResponse(code="00000", data={
+    return SuccessResponse(data={
         "captchaKey": result["captcha_key"],
         "captchaBase64": result["images_base64"]
     })
