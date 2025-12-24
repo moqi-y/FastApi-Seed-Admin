@@ -1,6 +1,6 @@
-# FastApi-Seed
+# FastApi-Seed-Admin
 
-> 基于FastApi的后端项目快速开发模板,包含基础的CRUD操作和中间件,以及数据库模型和配置。
+> 基于Vue3+FastApi+SQLModel框架的后台管理模板。
 
 ## FastApi-Seed 项目目录说明
 > - **web** - Web管理端目录
@@ -36,7 +36,7 @@ git clone git@github.com:moqi-y/FastApi-Seed.git
 ```
 
 ## 安装依赖
-
+### 服务端：    
 **Python版本：** `3.10.11`
 > 推荐先创建**虚拟环境**，然后在虚拟环境中安装项目依赖和运行项目,避免污染全局环境。                                    
 > 创建虚拟环境： `python -m venv venv`       
@@ -64,6 +64,20 @@ pip install fastapi -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mir
 华中理工大学：http://pypi.hustunique.com/
 山东理工大学：http://pypi.sdutlinux.org/
 豆瓣：http://pypi.douban.com/simple/
+```
+### Web管理端
+**Node.js版本：** `22.21.1`
+> 进入`/web/vue3-element-admin`目录，执行以下命令安装依赖包
+```bash
+# 1. 将npm配置为淘宝镜像源
+npm config set registry https://registry.npmmirror.com/
+# 2. 查看配置是否生效
+npm config get registry
+  # -->输出：https://registry.npmmirror.com/即为生效。
+# 3. 安装所有依赖包
+npm install
+# 4. 恢复官方源（可选）
+npm config set registry https://registry.npmjs.org/
 ```
 
 ## 配置环境变量
@@ -218,4 +232,6 @@ pymysql~=1.1.1
 
 ### 参考文档
 - [FastAPI 官方文档](https://fastapi.tiangolo.com/zh/)
-- [SQLModel 官方文档](https://sqlmodel.fastapi.org.cn/)
+- [SQLModel 官方文档](https://sqlmodel.fastapi.org.cn/) 
+- [vue3-element-admin 官方文档](https://www.youlai.tech/vue-docs/guide/quick-start.html)
+- [接口文档](https://s.apifox.cn/195e783f-4d85-4235-a038-eec696de4ea5)
