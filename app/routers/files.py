@@ -9,7 +9,6 @@ router = APIRouter()
 # 本地上传文件
 @router.post("", summary="本地文件上传")
 async def root(file: UploadFile = File(...)):
-    print("file:", file)
     try:
         file_sever = LocalFileUploader('static')
         file_path = await file_sever.upload_file(file, allowed_ext={".jpg", ".png", ".jpeg"})
@@ -19,7 +18,10 @@ async def root(file: UploadFile = File(...)):
             "file_size": file.size / 1024 / 1024,
             "size_unit": "M",  # 单位
             "file_type": file.content_type,
-            "file_path": file_path
+            "file_path": file_path,
+            # 兼容属性
+            "name": file.filename,
+            "url": file_path
         })
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

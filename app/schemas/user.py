@@ -34,3 +34,14 @@ class UserIn(BaseModel):
     username: str
     password: str
     email: str | None
+
+
+# 个人中心修改用户信息
+class UserUpdate(BaseModel):
+    id: int | None = None
+    username: str | None = None
+    nickname: str | None = None
+    avatar: str | None = None
+    gender: int | None = None
+    mobile: str | None = None
+    email: str | None = None

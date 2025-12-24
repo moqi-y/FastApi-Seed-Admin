@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 
 from app.crud.permission import get_perm_by_id, get_user_perm_codes
 from app.crud.role import get_role_by_id, get_user_roles_codes, get_role_by_code
@@ -7,7 +7,7 @@ from app.crud.user import get_user_by_username, update_user_info, get_user_by_id
 from app.crud.user_role import get_user_roles
 from app.dependencies import get_current_user
 from app.schemas.response import SuccessResponse
-from app.schemas.user import UserOut, UserIn
+from app.schemas.user import UserOut, UserIn, UserUpdate
 
 router = APIRouter()
 
@@ -89,3 +89,16 @@ async def root(current_user=Depends(get_current_user)):
         "roleNames": role_info.role_desc or role_info.role_name,
         "createTime": current_user.created_at
     })
+
+
+# 个人中心修改用户信息
+@router.put("/profile", summary="个人中心修改用户信息")
+async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    user.id = current_user.user_id
+    new_user = UserUpdate(**user.dict())
+    result = await update_user_info(new_user)
+    if not result:
+        raise HTTPException(status_code=500, detail="修改失败")
+    return SuccessResponse()

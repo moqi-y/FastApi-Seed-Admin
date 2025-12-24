@@ -2,6 +2,7 @@ from sqlmodel import select, Session
 from app.core.security import verify_password
 from app.crud.database import engine
 from app.models.user import User
+from app.schemas.user import UserUpdate
 
 session = Session(engine)
 
@@ -68,13 +69,16 @@ def authenticate_user(username: str, password: str):
 
 
 # 更新用户信息
-def update_user_info(user_id: int, username: str, password: str, email: str):
+async def update_user_info(user: UserUpdate):
     try:
         # 更新用户信息
-        result = session.exec(select(User).where(User.id == user_id)).one()
-        result.username = username
-        result.password = password
-        result.email = email
+        result = session.exec(select(User).where(User.user_id == user.id)).one()
+        result.username = user.username if user.username is not None else result.username  # 如果用户名不为空，则更新用户名
+        result.nickname = user.nickname if user.nickname is not None else result.nickname  # 如果昵称不为空，则更新昵称
+        result.avatar = user.avatar if user.avatar is not None else result.avatar
+        result.gender = user.gender if user.gender is not None else result.gender
+        result.mobile = user.mobile if user.mobile is not None else result.mobile
+        result.email = user.email if user.email is not None else result.email
         session.add(result)
         session.commit()
         session.refresh(result)
