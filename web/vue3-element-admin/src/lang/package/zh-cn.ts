@@ -13,7 +13,7 @@ export default {
     username: "用户名",
     password: "密码",
     login: "登 录",
-    captchaCode: "验证码",
+    captchaCode: "验证码（不区分大小写）",
     capsLock: "大写锁定已打开",
     rememberMe: "记住我",
     forgetPassword: "忘记密码？",
