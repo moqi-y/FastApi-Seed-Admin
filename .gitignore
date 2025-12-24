@@ -1,0 +1,173 @@
+# 默认忽略的文件
+/shelf/
+/workspace.xml
+# 基于编辑器的 HTTP 客户端请求
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+# Editor-specific files
+/dataSources.local.xml
+dataSources.local.xml
+FastApi-Seed.iml
+misc.xml
+modules.xml
+.idea/*
+.idea/*\*
+out/
+# Gradle
+.gradle/
+vcs.xml
+workspace.xml
+/logs/*
+profiles_settings.xml
+*.db
+app/__pycache__/__init__.cpython-310.pyc
+app/__pycache__/dependencies.cpython-310.pyc
+app/__pycache__/main.cpython-310.pyc
+app/core/__pycache__/__init__.cpython-310.pyc
+app/core/__pycache__/security.cpython-310.pyc
+app/crud/__pycache__/__init__.cpython-310.pyc
+app/crud/__pycache__/database.cpython-310.pyc
+app/crud/__pycache__/user.cpython-310.pyc
+app/external_services/__pycache__/__init__.cpython-310.pyc
+app/external_services/file_uploader/__pycache__/__init__.cpython-310.pyc
+app/external_services/file_uploader/__pycache__/service.cpython-310.pyc
+app/middleware/__pycache__/__init__.cpython-310.pyc
+app/middleware/__pycache__/cors.cpython-310.pyc
+app/middleware/__pycache__/logger_config.cpython-310.pyc
+app/models/__pycache__/__init__.cpython-310.pyc
+app/models/__pycache__/user.cpython-310.pyc
+app/routers/__pycache__/__init__.cpython-310.pyc
+app/routers/__pycache__/auth.cpython-310.pyc
+app/routers/__pycache__/files.cpython-310.pyc
+app/routers/__pycache__/user.cpython-310.pyc
+app/schemas/__pycache__/__init__.cpython-310.pyc
+app/schemas/__pycache__/response.cpython-310.pyc
+app/schemas/__pycache__/user.cpython-310.pyc
+app/services/__pycache__/__init__.cpython-310.pyc
+# 忽略虚拟环境
+venv/
+.env/
+
+# 忽略 Python 缓存
+__pycache__/
+*.pyc
+
+# 忽略 IDE 配置
+.vscode/
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.history
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.local
+
+stats.html
+pnpm-lock.yaml
+package-lock.json
+.stylelintcache
+.eslintcache

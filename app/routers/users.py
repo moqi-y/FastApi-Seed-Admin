@@ -1,0 +1,69 @@
+from fastapi import APIRouter, HTTPException, Depends
+
+from app.crud.permission import get_perm_by_id, get_user_perm_codes
+from app.crud.role import get_role_by_id, get_user_roles_codes
+from app.crud.role_perms import list_role_permissions
+from app.crud.user import get_user_by_username, update_user_info, get_user_by_id
+from app.crud.user_role import get_user_roles
+from app.dependencies import get_current_user
+from app.schemas.response import SuccessResponse
+from app.schemas.user import UserOut, UserIn
+
+router = APIRouter()
+
+
+# 获取用户信息
+@router.get("/me", summary="获取当前用户信息")
+async def get_me(current_user=Depends(get_current_user)):
+    roles = await get_user_roles_codes(current_user.user_id)
+    perms = await get_user_perm_codes(current_user.user_id)
+    user = {
+        "userId": current_user.user_id,
+        "username": current_user.username,
+        "nickname": current_user.nickname,
+        "avatar": current_user.avatar,
+        "email": current_user.email,
+        "created_at": current_user.created_at,
+        "roles": roles,  # 用户角色,例如：["admin", "user"]
+        "perms": perms  # 用户权限,例如：["user:add", "user:delete"]
+    }
+    return SuccessResponse(code="00000", data=user)
+
+
+# 通过用户名查询用户信息
+@router.get("/userinfo/{username}", response_model=SuccessResponse, summary="通过用户名查询用户信息")
+async def get_user(username: str):
+    user = get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse(data={
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email
+    })
+
+
+# 通过用户id查询用户信息
+@router.get("/userinfo", response_model=SuccessResponse, summary="通过用户id查询用户信息")
+async def root(user_id: int):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse(data={
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email
+    })
+
+
+# 更新用户信息
+@router.put("/userinfo", response_model=SuccessResponse, summary="更新用户全部信息")
+async def update_user(user_id: int, user: UserIn):
+    user = update_user_info(user_id, user.username, user.password, user.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse(data={
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email
+    })
