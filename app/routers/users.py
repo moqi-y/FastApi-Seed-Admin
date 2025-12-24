@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
 from app.crud.permission import get_perm_by_id, get_user_perm_codes
-from app.crud.role import get_role_by_id, get_user_roles_codes
+from app.crud.role import get_role_by_id, get_user_roles_codes, get_role_by_code
 from app.crud.role_perms import list_role_permissions
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id
 from app.crud.user_role import get_user_roles
@@ -66,4 +66,26 @@ async def update_user(user_id: int, user: UserIn):
         "user_id": user.user_id,
         "username": user.username,
         "email": user.email
+    })
+
+
+# 获取个人中心用户信息
+@router.get("/profile", response_model=SuccessResponse, summary="获取个人中心用户信息")
+async def root(current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    roles = await get_user_roles_codes(current_user.user_id)
+    role_info = await get_role_by_code(roles[0])
+    perms = await get_user_perm_codes(current_user.user_id)
+    return SuccessResponse(data={
+        "id": current_user.user_id,
+        "username": current_user.username,
+        "nickname": current_user.nickname,
+        "avatar": current_user.avatar,
+        "gender": 1,
+        "mobile": "",
+        "email": current_user.email,
+        "deptName": "管理中心",
+        "roleNames": role_info.role_desc or role_info.role_name,
+        "createTime": current_user.created_at
     })

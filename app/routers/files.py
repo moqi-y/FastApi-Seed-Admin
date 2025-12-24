@@ -6,7 +6,7 @@ router = APIRouter()
 
 
 # 本地上传文件
-@router.post("/upload", summary="本地文件上传")
+@router.post("/", summary="本地文件上传")
 async def upload_file_local(file: UploadFile = File(...)):
     try:
         file_sever = LocalFileUploader('static')

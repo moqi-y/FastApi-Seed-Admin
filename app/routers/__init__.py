@@ -24,7 +24,8 @@ def router_config(app):
     app.include_router(
         files.router,
         prefix="/api/v1/files",  # 路径名
-        tags=["files"]  # 文档标签名
+        tags=["files"],  # 文档标签名
+        dependencies=[Depends(get_current_user)]
     )
 
     app.include_router(

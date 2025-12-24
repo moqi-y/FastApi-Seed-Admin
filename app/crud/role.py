@@ -61,6 +61,19 @@ async def get_role_by_id(role_id):
         session.close()
 
 
+# 根据role_code获取角色信息
+async def get_role_by_code(role_code):
+    try:
+        query = select(Role).where(Role.role_code == role_code)
+        role = session.exec(query).first()
+        return role
+    except Exception as e:
+        print("SQL_Error:", e)
+        return None
+    finally:
+        session.close()
+
+
 async def add_role(roles: RoleCreate):
     """添加角色"""
     try:

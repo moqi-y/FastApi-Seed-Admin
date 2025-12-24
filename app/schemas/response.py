@@ -10,7 +10,7 @@ class SuccessResponse(BaseModel):
     - message: str = "操作成功"  # 定义响应消息
     - data: Any  # 定义响应数据为任意类型
     """
-    code: int | str = 200  # 定义响应码为200
+    code: int | str = '00000'  # 定义响应码为200
     message: str = "操作成功"  # 定义响应消息
     data: Any = None  # 定义响应数据为任意类型
 
