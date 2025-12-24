@@ -68,8 +68,14 @@ async def verify_captcha(captcha_key, captcha_value):
                 session.commit()
                 return CaptchaStatus.OK
             elif captcha.captcha_value == captcha_value and captcha.expire_time < datetime.now():
+                # 验证码已过期，删除验证码
+                session.delete(captcha)
+                session.commit()
                 return CaptchaStatus.EXPIRED
             else:
+                # 验证码错误，删除验证码
+                session.delete(captcha)
+                session.commit()
                 return CaptchaStatus.INVALID
         else:
             return CaptchaStatus.ERROR

@@ -1,3 +1,6 @@
+from fastapi import Depends
+
+from app.dependencies import get_current_user
 from app.routers import auth, users, files, roles, permissions, user_role, role_perms, menu
 
 
@@ -51,5 +54,6 @@ def router_config(app):
     app.include_router(
         menu.router,
         prefix="/api/v1/menus",  # 路径名
-        tags=["menus"]  # 文档标签名
+        tags=["menus"],  # 文档标签名
+        dependencies=[Depends(get_current_user)]
     )
