@@ -185,19 +185,19 @@ RUN pip install --no-cache-dir \
 # 3. 复制其余源码
 COPY ./app ./app
 
-EXPOSE 8080
+EXPOSE 8080 3000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
 ```
 2. 构建镜像:
 ```bash
-docker build -t FastApi-Seed .
+docker build -t FastApi-Seed-Admin .
 ```
 3. 运行容器:
 ```bash
 # 查看镜像
 docker images
 # 运行容器
-docker run -itd -p 8080:8080 --name My-FastApi-Seed FastApi-Seed:latest
+docker run -itd -p 8080:8080 -p 3000:3000 --name My-FastApi-Seed-Admin FastApi-Seed-Admin:latest
 ```
 
 ### JWT随机密钥生成
