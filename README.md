@@ -2,7 +2,7 @@
 
 > 基于Vue3+FastApi+SQLModel框架的后台管理模板。
 
-## FastApi-Seed 项目目录说明
+## 项目目录说明
 > - **web** - Web管理端目录
 >   - **vue3-element-admin** - 基于Vue3和Element Plus的后台管理前端项目目录。
 > - **app** - 应用的主目录，包含应用的核心代码和逻辑。
@@ -30,9 +30,9 @@
 
 ```bash
 # 使用https协议
-git clone https://github.com/moqi-y/FastApi-Seed.git
+git clone https://github.com/moqi-y/FastApi-Seed-Admin.git
 # 使用ssh协议
-git clone git@github.com:moqi-y/FastApi-Seed.git
+git clone git@github.com:moqi-y/FastApi-Seed-Admin.git
 ```
 
 ## 安装依赖
@@ -126,9 +126,9 @@ npm run dev
 
 ```bash
 # 复制项目到部署目录
-cp -r FastApi-Seed /data/wwwroot/FastApi-Seed
+cp -r FastApi-Seed-Admin /data/wwwroot/FastApi-Seed-Admin
 # 进入项目目录
-cd /data/wwwroot/FastApi-Seed
+cd /data/wwwroot/FastApi-Seed-Admin
 # 创建虚拟环境 myenv,创建成功后可在当前目录下看到此目录
 python3.10 -m venv myenv
 # 激活虚拟环境
@@ -136,6 +136,15 @@ source myenv/bin/activate
 # 安装依赖文件
 pip install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r requirements.txt
 # 启动运行并保持后台
+nohup uvicorn app.main:app --host 0.0.0.0 --port 8080 &
+
+# 前端项目包打包部署
+cd /data/wwwroot/FastApi-Seed-Admin/web/vue3-element-admin
+npm run build
+# 将打包后的文件复制到静态目录
+cp -r dist/* /data/wwwroot/FastApi-Seed-Admin/web
+# 重启服务
+killall uvicorn
 nohup uvicorn app.main:app --host 0.0.0.0 --port 8080 &
 ```
 > 多工作进程模式
