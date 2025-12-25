@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from enum import Enum
+from random import random
 
 from sqlmodel import select, Session
 from app.core.security import verify_password, hash_password
@@ -149,7 +150,7 @@ SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 async def send_email_code(email: str, user_id: int) -> SendStatus:
     try:
         # 查询是否已存在该邮箱
-        result = session.exec(select(Email).where(email == email)).one_or_none()
+        result = session.exec(select(Email).where(Email.email == email)).one_or_none()
         if result is not None:
             return SendStatus.exist
         # 生成邮箱验证码
@@ -184,5 +185,20 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
         session.close()
 
 
+# 生成随机验证码
 def generate_code() -> str:
-    return "WDDX"
+    return str(random() * 1000).replace('.', '')[0:5]
+
+
+# 根据邮箱查询code
+def get_code_by_email(email: str):
+    try:
+        result = session.exec(select(Email).where(email == email)).first()
+        if result:
+            return result
+        else:
+            return None
+    except Exception as e:
+        print(f"get_code_by_email() SQL_Error: {e}")
+    finally:
+        session.close()

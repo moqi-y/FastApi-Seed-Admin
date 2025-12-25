@@ -1,11 +1,15 @@
+import re
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException, Depends, Body
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus
+    send_email_code, SendStatus, get_code_by_email
 from app.dependencies import get_current_user
 from app.schemas.response import SuccessResponse
 from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate
+from app.utils.verification import check_email
 
 router = APIRouter()
 
@@ -126,12 +130,14 @@ async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_cu
 @router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）")
 async def root(email: str, current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    if not email:
-        raise HTTPException(status_code=500, detail="邮箱格式错误")
+        raise HTTPException(status_code=401, detail="未授权访问")
+    if not check_email(email):
+        raise HTTPException(status_code=400, detail="邮箱格式错误")
+    if current_user.email == email:
+        raise HTTPException(status_code=400, detail="邮箱已绑定")
     result = await send_email_code(email, current_user.user_id)
     if result == SendStatus.exist:
-        raise HTTPException(status_code=500, detail="邮箱已存在")
+        raise HTTPException(status_code=400, detail="邮箱已存在")
     elif result == SendStatus.error:
         raise HTTPException(status_code=500, detail="发送失败")
     elif result == SendStatus.success:
@@ -145,6 +151,20 @@ async def root(email: str, current_user=Depends(get_current_user)):
 async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=404, detail="用户不存在")
-    if not email:
-        raise HTTPException(status_code=500, detail="邮箱格式错误")
-    return SuccessResponse()
+    if not check_email(email.email):
+        raise HTTPException(status_code=400, detail="邮箱格式错误")
+    if not email.code:
+        raise HTTPException(status_code=400, detail="验证码不能为空")
+    email_res = get_code_by_email(email.email)
+    if not email_res:
+        raise HTTPException(status_code=500, detail="修改失败")
+    if email_res.code != email.code:
+        raise HTTPException(status_code=400, detail="验证码错误")
+    if email_res.expire_time < datetime.now():
+        raise HTTPException(status_code=400, detail="验证码已过期")
+    info = UserUpdate(id=current_user.user_id, email=email.email)
+    result = await update_user_info(info)
+    if not result:
+        raise HTTPException(status_code=500, detail="修改失败")
+    else:
+        return SuccessResponse()
