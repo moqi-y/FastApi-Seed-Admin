@@ -45,3 +45,8 @@ class UserUpdate(BaseModel):
     gender: int | None = None
     mobile: str | None = None
     email: str | None = None
+
+
+class PasswordUpdate(BaseModel):
+    oldPassword: str
+    newPassword: str

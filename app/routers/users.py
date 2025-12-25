@@ -3,11 +3,11 @@ from fastapi import APIRouter, HTTPException, Depends, Body
 from app.crud.permission import get_perm_by_id, get_user_perm_codes
 from app.crud.role import get_role_by_id, get_user_roles_codes, get_role_by_code
 from app.crud.role_perms import list_role_permissions
-from app.crud.user import get_user_by_username, update_user_info, get_user_by_id
+from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus
 from app.crud.user_role import get_user_roles
 from app.dependencies import get_current_user
 from app.schemas.response import SuccessResponse
-from app.schemas.user import UserOut, UserIn, UserUpdate
+from app.schemas.user import UserOut, UserIn, UserUpdate, PasswordUpdate
 
 router = APIRouter()
 
@@ -102,3 +102,23 @@ async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_us
     if not result:
         raise HTTPException(status_code=500, detail="修改失败")
     return SuccessResponse()
+
+
+# 修改密码
+@router.put("/password", summary="修改密码")
+async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    result = await update_user_password(password, current_user.user_id)
+    if not result:
+        raise HTTPException(status_code=500, detail="修改失败")
+    elif result == PasswordStatus.success:
+        return SuccessResponse()
+    elif result == PasswordStatus.samePasswordError:
+        raise HTTPException(status_code=500, detail="新密码不能与旧密码相同")
+    elif result == PasswordStatus.oldPasswordError:
+        raise HTTPException(status_code=500, detail="旧密码错误")
+    elif result == PasswordStatus.newPasswordError:
+        raise HTTPException(status_code=500, detail="新密码格式错误")
+    else:
+        raise HTTPException(status_code=500, detail="修改失败")

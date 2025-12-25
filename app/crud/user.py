@@ -1,8 +1,10 @@
+from enum import Enum
+
 from sqlmodel import select, Session
-from app.core.security import verify_password
+from app.core.security import verify_password, hash_password
 from app.crud.database import engine
 from app.models.user import User
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserUpdate, PasswordUpdate
 
 session = Session(engine)
 
@@ -83,6 +85,50 @@ async def update_user_info(user: UserUpdate):
         session.commit()
         session.refresh(result)
         return True
+    except Exception as e:
+        print(f"SQL_Error: {e}")
+        return False
+    finally:
+        session.close()
+
+
+class PasswordStatus(int, Enum):
+    success = 1  # 成功状态
+    fail = 2  # 失败状态
+    oldPasswordError = 3  # 原始密码错误
+    newPasswordError = 4  # 新密码错误
+    samePasswordError = 5  # 新密码与原始密码相同
+
+
+async def update_user_password(password: PasswordUpdate, user_id: int):
+    try:
+        # 不允许有空格
+        if password.newPassword is not None:
+            password.newPassword = password.newPassword.strip()
+        # 存在性校验
+        if password.newPassword is None or password.newPassword == "":
+            print("newPasswordError")
+            return PasswordStatus.newPasswordError
+        if password.oldPassword is None or password.oldPassword == "":
+            print("oldPasswordError")
+            return PasswordStatus.oldPasswordError
+        # 获取用户信息
+        result = session.exec(select(User).where(User.user_id == user_id)).one()
+        # 校验原始密码是否正确
+        if not verify_password(password.oldPassword, result.password):
+            print("oldPasswordError")
+            return PasswordStatus.oldPasswordError
+            # 校验新密码是否与原始密码一致
+        elif verify_password(password.newPassword, result.password):
+            print("samePasswordError")
+            return PasswordStatus.samePasswordError
+        else:
+            # 更新用户密码
+            result.password = hash_password(password.newPassword)
+            session.add(result)
+            session.commit()
+            session.refresh(result)
+            return PasswordStatus.success
     except Exception as e:
         print(f"SQL_Error: {e}")
         return False

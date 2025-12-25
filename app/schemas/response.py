@@ -6,7 +6,7 @@ from pydantic import BaseModel
 # 定义一个成功响应的类
 class SuccessResponse(BaseModel):
     """
-    - code: int = 200  # 定义响应码为200
+    - code: int = 00000  # 定义响应码为00000
     - message: str = "操作成功"  # 定义响应消息
     - data: Any  # 定义响应数据为任意类型
     """
