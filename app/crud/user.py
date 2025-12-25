@@ -151,7 +151,7 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
     try:
         # 查询是否已存在该邮箱
         result = session.exec(select(Email).where(Email.email == email)).one_or_none()
-        if result is not None:
+        if result is not None and result.expire_time > datetime.now():
             return SendStatus.exist
         # 生成邮箱验证码
         code = generate_code()
@@ -161,7 +161,7 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
             sender_password=SENDER_PASSWORD,
             recipient_email=email,
             subject="FastApi-Seed-Admin 验证码",
-            body=f"您正在进行邮箱验证操作，验证码为：{code}，验证码有效期 10 分钟。如非本人操作请忽略。",
+            body=f"您正在进行邮箱验证操作，验证码为：【 {code} 】，验证码有效期 10 分钟。如非本人操作请忽略。",
             smtp_server="smtp.163.com",
             smtp_port=25,
             use_tls=False
@@ -188,6 +188,8 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
 # 生成随机验证码
 def generate_code() -> str:
     return str(random() * 1000).replace('.', '')[0:5]
+
+# 发送邮箱任务
 
 
 # 根据邮箱查询code
