@@ -107,20 +107,16 @@ async def update_user_password(password: PasswordUpdate, user_id: int):
             password.newPassword = password.newPassword.strip()
         # 存在性校验
         if password.newPassword is None or password.newPassword == "":
-            print("newPasswordError")
             return PasswordStatus.newPasswordError
         if password.oldPassword is None or password.oldPassword == "":
-            print("oldPasswordError")
             return PasswordStatus.oldPasswordError
         # 获取用户信息
         result = session.exec(select(User).where(User.user_id == user_id)).one()
         # 校验原始密码是否正确
         if not verify_password(password.oldPassword, result.password):
-            print("oldPasswordError")
             return PasswordStatus.oldPasswordError
             # 校验新密码是否与原始密码一致
         elif verify_password(password.newPassword, result.password):
-            print("samePasswordError")
             return PasswordStatus.samePasswordError
         else:
             # 更新用户密码
