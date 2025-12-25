@@ -50,3 +50,8 @@ class UserUpdate(BaseModel):
 class PasswordUpdate(BaseModel):
     oldPassword: str
     newPassword: str
+
+
+class EmailUpdate(BaseModel):
+    email: str
+    code: str

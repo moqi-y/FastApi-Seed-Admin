@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta
 from enum import Enum
 
 from sqlmodel import select, Session
 from app.core.security import verify_password, hash_password
 from app.crud.database import engine
-from app.models.user import User
+from app.models.user import User, Email
 from app.schemas.user import UserUpdate, PasswordUpdate
+from app.utils.send_email import send_email
 
 session = Session(engine)
 
@@ -130,3 +132,52 @@ async def update_user_password(password: PasswordUpdate, user_id: int):
         return False
     finally:
         session.close()
+
+
+class SendStatus(int, Enum):
+    success = 0  # 发送成功
+    error = 1  # 发送失败
+    exist = 2  # 已存在
+
+
+# 发送验证码并插入数据表
+async def send_email_code(email: str, user_id: int) -> SendStatus:
+    try:
+        # 查询是否已存在该邮箱
+        result = session.exec(select(Email).where(email == email)).one_or_none()
+        if result is not None:
+            return SendStatus.exist
+        # 生成邮箱验证码
+        code = generate_code()
+        # 发送邮件
+        send_res = send_email(
+            sender_email="moqi201@163.com",
+            sender_password="YWUaA33dfaCRBELM",
+            recipient_email=email,
+            subject="FastApi-Seed-Admin 验证码",
+            body=f"您正在进行邮箱验证操作，验证码为：{code}，验证码有效期 10 分钟。如非本人操作请忽略。",
+            smtp_server="smtp.163.com",
+            smtp_port=25,
+            use_tls=False
+        )
+        if send_res["code"] == 200:
+            # 插入数据
+            session.add(Email(email=email, code=code, user_id=user_id,
+                              expire_time=datetime.now() + timedelta(minutes=10),
+                              create_time=datetime.now()))
+            session.commit()
+            return SendStatus.success
+        else:
+            # 删除记录
+            session.delete(Email(email=email, user_id=user_id))
+            session.commit()
+            return SendStatus.error
+    except Exception as e:
+        print(f"send_email_code() SQL_Error: {e}")
+        return SendStatus.error
+    finally:
+        session.close()
+
+
+def generate_code() -> str:
+    return "WDDX"

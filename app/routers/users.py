@@ -1,13 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, Body
-
-from app.crud.permission import get_perm_by_id, get_user_perm_codes
-from app.crud.role import get_role_by_id, get_user_roles_codes, get_role_by_code
-from app.crud.role_perms import list_role_permissions
-from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus
-from app.crud.user_role import get_user_roles
+from app.crud.permission import get_user_perm_codes
+from app.crud.role import get_user_roles_codes, get_role_by_code
+from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
+    send_email_code, SendStatus
 from app.dependencies import get_current_user
 from app.schemas.response import SuccessResponse
-from app.schemas.user import UserOut, UserIn, UserUpdate, PasswordUpdate
+from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate
 
 router = APIRouter()
 
@@ -122,3 +120,31 @@ async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_cu
         raise HTTPException(status_code=500, detail="新密码格式错误")
     else:
         raise HTTPException(status_code=500, detail="修改失败")
+
+
+# 发送邮箱验证码（绑定或更换邮箱）
+@router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）")
+async def root(email: str, current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if not email:
+        raise HTTPException(status_code=500, detail="邮箱格式错误")
+    result = await send_email_code(email, current_user.user_id)
+    if result == SendStatus.exist:
+        raise HTTPException(status_code=500, detail="邮箱已存在")
+    elif result == SendStatus.error:
+        raise HTTPException(status_code=500, detail="发送失败")
+    elif result == SendStatus.success:
+        return SuccessResponse()
+    else:
+        raise HTTPException(status_code=500, detail="发送失败")
+
+
+# 绑定或更换邮箱
+@router.put("/email", summary="绑定或更换邮箱")
+async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if not email:
+        raise HTTPException(status_code=500, detail="邮箱格式错误")
+    return SuccessResponse()
