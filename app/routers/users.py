@@ -1,12 +1,13 @@
 import re
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
     send_email_code, SendStatus, get_code_by_email
 from app.dependencies import get_current_user
+from app.middleware.background_tasks import clean_email_code
 from app.schemas.response import SuccessResponse
 from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate
 from app.utils.verification import check_email
@@ -128,7 +129,8 @@ async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_cu
 
 # 发送邮箱验证码（绑定或更换邮箱）
 @router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）")
-async def root(email: str, current_user=Depends(get_current_user)):
+async def root(email: str, background_tasks: BackgroundTasks, current_user=Depends(get_current_user)):
+    background_tasks.add_task(clean_email_code)
     if not current_user:
         raise HTTPException(status_code=401, detail="未授权访问")
     if not check_email(email):
