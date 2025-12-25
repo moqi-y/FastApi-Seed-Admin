@@ -189,8 +189,6 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
 def generate_code() -> str:
     return str(random() * 1000).replace('.', '')[0:5]
 
-# 发送邮箱任务
-
 
 # 根据邮箱查询code
 def get_code_by_email(email: str):
