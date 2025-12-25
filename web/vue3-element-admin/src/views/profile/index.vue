@@ -25,21 +25,21 @@
             </div>
             <div class="user-role">{{ userProfile.roleNames }}</div>
           </div>
-          <el-divider/>
-          <div class="user-stats">
-            <div class="stat-item">
-              <div class="stat-value">0</div>
-              <div class="stat-label">待办</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">0</div>
-              <div class="stat-label">消息</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">0</div>
-              <div class="stat-label">通知</div>
-            </div>
-          </div>
+<!--          <el-divider/>-->
+<!--          <div class="user-stats">-->
+<!--            <div class="stat-item">-->
+<!--              <div class="stat-value">0</div>-->
+<!--              <div class="stat-label">待办</div>-->
+<!--            </div>-->
+<!--            <div class="stat-item">-->
+<!--              <div class="stat-value">0</div>-->
+<!--              <div class="stat-label">消息</div>-->
+<!--            </div>-->
+<!--            <div class="stat-item">-->
+<!--              <div class="stat-value">0</div>-->
+<!--              <div class="stat-label">通知</div>-->
+<!--            </div>-->
+<!--          </div>-->
         </el-card>
       </el-col>
 
