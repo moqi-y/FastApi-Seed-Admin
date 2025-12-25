@@ -48,7 +48,7 @@
             </template>
           </el-input>
           <div cursor-pointer h="[40px]" w="[120px]" flex-center ml-10px @click="getCaptcha">
-            <el-icon v-if="codeLoading" class="is-loading"><Loading /></el-icon>
+            <el-icon v-if="codeLoading" class="is-loading"><Loading/></el-icon>
 
             <img
               v-else

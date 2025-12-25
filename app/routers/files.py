@@ -21,7 +21,7 @@ async def root(file: UploadFile = File(...)):
             "file_path": file_path,
             # 兼容属性
             "name": file.filename,
-            "url": file_path
+            "url": f':8080{file_path}'
         })
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

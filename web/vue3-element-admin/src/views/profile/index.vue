@@ -6,7 +6,7 @@
         <el-card class="user-card">
           <div class="user-info">
             <div class="avatar-wrapper">
-              <el-avatar :src="userProfile.avatar" :size="100" />
+              <el-avatar :src="userProfile.avatar" :size="100"/>
               <el-button
                 type="info"
                 class="avatar-edit-btn"
@@ -15,17 +15,17 @@
                 size="small"
                 @click="triggerFileUpload"
               />
-              <input ref="fileInput" type="file" style="display: none" @change="handleFileChange" />
+              <input ref="fileInput" type="file" style="display: none" @change="handleFileChange"/>
             </div>
             <div class="user-name">
               <span class="nickname">{{ userProfile.nickname }}</span>
               <el-icon class="edit-icon" @click="handleOpenDialog(DialogType.ACCOUNT)">
-                <Edit />
+                <Edit/>
               </el-icon>
             </div>
             <div class="user-role">{{ userProfile.roleNames }}</div>
           </div>
-          <el-divider />
+          <el-divider/>
           <div class="user-stats">
             <div class="stat-item">
               <div class="stat-value">0</div>
@@ -55,10 +55,10 @@
             <el-descriptions-item label="用户名">
               {{ userProfile.username }}
               <el-icon v-if="userProfile.gender === 1" class="gender-icon male">
-                <Male />
+                <Male/>
               </el-icon>
               <el-icon v-else class="gender-icon female">
-                <Female />
+                <Female/>
               </el-icon>
             </el-descriptions-item>
             <el-descriptions-item label="手机号码">
@@ -137,10 +137,10 @@
         :label-width="100"
       >
         <el-form-item label="昵称">
-          <el-input v-model="userProfileForm.nickname" />
+          <el-input v-model="userProfileForm.nickname"/>
         </el-form-item>
         <el-form-item label="性别">
-          <Dict v-model="userProfileForm.gender" code="gender" />
+          <Dict v-model="userProfileForm.gender" code="gender"/>
         </el-form-item>
       </el-form>
 
@@ -153,13 +153,13 @@
         :label-width="100"
       >
         <el-form-item label="原密码" prop="oldPassword">
-          <el-input v-model="passwordChangeForm.oldPassword" type="password" show-password />
+          <el-input v-model="passwordChangeForm.oldPassword" type="password" show-password/>
         </el-form-item>
         <el-form-item label="新密码" prop="newPassword">
-          <el-input v-model="passwordChangeForm.newPassword" type="password" show-password />
+          <el-input v-model="passwordChangeForm.newPassword" type="password" show-password/>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input v-model="passwordChangeForm.confirmPassword" type="password" show-password />
+          <el-input v-model="passwordChangeForm.confirmPassword" type="password" show-password/>
         </el-form-item>
       </el-form>
 
@@ -172,7 +172,7 @@
         :label-width="100"
       >
         <el-form-item label="手机号码" prop="mobile">
-          <el-input v-model="mobileUpdateForm.mobile" style="width: 250px" />
+          <el-input v-model="mobileUpdateForm.mobile" style="width: 250px"/>
         </el-form-item>
         <el-form-item label="验证码" prop="code">
           <el-input v-model="mobileUpdateForm.code" style="width: 250px">
@@ -194,7 +194,7 @@
         :label-width="100"
       >
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="emailUpdateForm.email" style="width: 250px" />
+          <el-input v-model="emailUpdateForm.email" style="width: 250px"/>
         </el-form-item>
         <el-form-item label="验证码" prop="code">
           <el-input v-model="emailUpdateForm.code" style="width: 250px">
@@ -228,7 +228,7 @@ import UserAPI, {
 
 import FileAPI from "@/api/file.api";
 
-import { Camera } from "@element-plus/icons-vue";
+import {Camera} from "@element-plus/icons-vue";
 
 const userProfile = ref<UserProfileVO>({});
 
@@ -262,35 +262,35 @@ const emailTimer = ref();
 
 // 修改密码校验规则
 const passwordChangeRules = {
-  oldPassword: [{ required: true, message: "请输入原密码", trigger: "blur" }],
-  newPassword: [{ required: true, message: "请输入新密码", trigger: "blur" }],
-  confirmPassword: [{ required: true, message: "请再次输入新密码", trigger: "blur" }],
+  oldPassword: [{required: true, message: "请输入原密码", trigger: "blur"}],
+  newPassword: [{required: true, message: "请输入新密码", trigger: "blur"}],
+  confirmPassword: [{required: true, message: "请再次输入新密码", trigger: "blur"}],
 };
 
 // 手机号校验规则
 const mobileBindingRules = {
   mobile: [
-    { required: true, message: "请输入手机号", trigger: "blur" },
+    {required: true, message: "请输入手机号", trigger: "blur"},
     {
       pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/,
       message: "请输入正确的手机号码",
       trigger: "blur",
     },
   ],
-  code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+  code: [{required: true, message: "请输入验证码", trigger: "blur"}],
 };
 
 // 邮箱校验规则
 const emailBindingRules = {
   email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
+    {required: true, message: "请输入邮箱", trigger: "blur"},
     {
       pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
       message: "请输入正确的邮箱地址",
       trigger: "blur",
     },
   ],
-  code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+  code: [{required: true, message: "请输入验证码", trigger: "blur"}],
 };
 
 /**
@@ -444,10 +444,12 @@ const handleFileChange = async (event: Event) => {
     try {
       const data = await FileAPI.uploadFile(file);
       // 更新用户头像
-      userProfile.value.avatar = data.url;
+      // userProfile.value.avatar = data.url;
+      userProfile.value.avatar = "//" + location.hostname + data.url;
       // 更新用户信息
       await UserAPI.updateProfile({
-        avatar: data.url,
+        // avatar: data.url,
+        avatar: "//" + location.hostname + data.url,
       });
     } catch (error) {
       console.error("头像上传失败：" + error);
