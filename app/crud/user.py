@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 from enum import Enum
 
@@ -140,6 +141,10 @@ class SendStatus(int, Enum):
     exist = 2  # 已存在
 
 
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
+
+
 # 发送验证码并插入数据表
 async def send_email_code(email: str, user_id: int) -> SendStatus:
     try:
@@ -151,8 +156,8 @@ async def send_email_code(email: str, user_id: int) -> SendStatus:
         code = generate_code()
         # 发送邮件
         send_res = send_email(
-            sender_email="moqi201@163.com",
-            sender_password="YWUaA33dfaCRBELM",
+            sender_email=SENDER_EMAIL,
+            sender_password=SENDER_PASSWORD,
             recipient_email=email,
             subject="FastApi-Seed-Admin 验证码",
             body=f"您正在进行邮箱验证操作，验证码为：{code}，验证码有效期 10 分钟。如非本人操作请忽略。",

@@ -103,6 +103,13 @@ MYSQL_DB="FastApi-Seed"
 JWT_SECRET_KEY="12345678"
 # jwt过期时间，单位：分钟。
 JWT_EXPIRE_MINUTES=120
+
+# 邮箱配置
+# 发送者邮箱
+SENDER_EMAIL="moqi201@163.com"
+# 发送者邮箱密码/授权码
+SENDER_PASSWORD="ABCDXXXXXX"
+
 ```
 > 注意事项：       
 > - 生产环境部署时需要将`SQL_TYPE`设置为`mysql`，并配置正确的数据库连接信息。         
