@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import hash_password
 from app.crud.role_perms import list_role_permissions
@@ -6,6 +6,7 @@ from app.crud.user import authenticate_user, get_user_by_username, create_user
 from app.crud.user_role import get_user_roles
 from app.dependencies import create_token_response, get_current_user
 from app.crud.generate_captcha import generate_captcha, verify_captcha, CaptchaStatus
+from app.middleware.background_tasks import clean_captcha
 from app.schemas.response import SuccessResponse, ErrorResponse
 from app.schemas.user import UserOut, UserCreate, Token
 
@@ -66,7 +67,9 @@ async def logout():
 
 # 验证码
 @router.get("/captcha", summary="验证码", response_model=SuccessResponse)
-async def root():
+async def root(background_tasks: BackgroundTasks):
+    # 初始化后台任务
+    background_tasks.add_task(clean_captcha)
     result = await generate_captcha()
     return SuccessResponse(data={
         "captchaKey": result["captcha_key"],

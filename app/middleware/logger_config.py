@@ -47,3 +47,8 @@ def make_logging_middleware():
         return response
 
     return logging_middleware
+
+
+# 主动记录日志
+async def log_info(message: str):
+    logger.info(f"{message}")

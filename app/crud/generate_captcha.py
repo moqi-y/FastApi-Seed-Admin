@@ -1,10 +1,6 @@
 from enum import Enum
 from random import random
-
-from fastapi import HTTPException
-
 from app.models.captcha import Captcha
-from app.schemas.response import ErrorResponse
 from app.utils.captcha_image import generate_captcha_image
 from datetime import datetime, timedelta
 
