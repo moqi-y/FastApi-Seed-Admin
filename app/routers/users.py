@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks, Qu
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus, get_code_by_email, get_users_page
+    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
 from app.schemas.response import SuccessResponse, PaginationResponse
@@ -74,7 +74,7 @@ async def update_user(user_id: int, user: UserIn):
 @router.get("/profile", response_model=SuccessResponse, summary="获取个人中心用户信息")
 async def root(current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=401, detail="未授权访问")
     roles = await get_user_roles_codes(current_user.user_id)
     role_info = await get_role_by_code(roles[0])
     perms = await get_user_perm_codes(current_user.user_id)
@@ -96,7 +96,7 @@ async def root(current_user=Depends(get_current_user)):
 @router.put("/profile", summary="个人中心修改用户信息")
 async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=401, detail="未授权访问")
     user.id = current_user.user_id
     new_user = UserUpdate(**user.dict())
     result = await update_user_info(new_user)
@@ -109,7 +109,7 @@ async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_us
 @router.put("/password", summary="修改密码")
 async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=401, detail="未授权访问")
     result = await update_user_password(password, current_user.user_id)
     if not result:
         raise HTTPException(status_code=500, detail="修改失败")
@@ -150,7 +150,7 @@ async def root(email: str, background_tasks: BackgroundTasks, current_user=Depen
 @router.put("/email", summary="绑定或更换邮箱")
 async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=401, detail="未授权访问")
     if not check_email(email.email):
         raise HTTPException(status_code=400, detail="邮箱格式错误")
     if not email.code:
@@ -174,7 +174,7 @@ async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_
 @router.get("/page", summary="获取用户分页列表")
 async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_current_user)):
     if not current_user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=401, detail="未授权访问")
     if queryUser.pageSize < 1:
         raise HTTPException(status_code=400, detail="页码不能小于1")
     if queryUser.pageNum < 1:
@@ -187,3 +187,19 @@ async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_c
             "total": result[0],
             "list": result[1]
         })
+
+
+# 删除用户
+@router.delete("/{user_id}", summary="删除用户", description="用户ID列表，逗号分隔，如 1 或 2,3,4")
+async def root(user_id: str, current_user=Depends(get_current_user)):
+    # 将string转换为list
+    user_id_list = user_id.split(",")
+    # 数组元素转为int
+    user_id_list = [int(i) for i in user_id_list]
+    if not current_user:
+        raise HTTPException(status_code=401, detail="未授权访问")
+    result = await delete_users(user_id_list)
+    if not result:
+        raise HTTPException(status_code=500, detail="删除失败")
+    else:
+        return SuccessResponse()

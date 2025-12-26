@@ -148,7 +148,7 @@
                   icon="delete"
                   link
                   size="small"
-                  @click="handleDelete(scope.row.id)"
+                  @click="handleDelete(scope.row.user_id)"
                 >
                   删除
                 </el-button>
@@ -323,7 +323,6 @@ async function fetchData() {
   loading.value = true;
   try {
     const data = await UserAPI.getPage(queryParams);
-    console.log("data:", data)
     pageData.value = data.list;
     total.value = data.total;
   } finally {
@@ -348,7 +347,8 @@ function handleResetQuery() {
 
 // 选中项发生变化
 function handleSelectionChange(selection: any[]) {
-  selectIds.value = selection.map((item) => item.id);
+  selectIds.value = selection.map((item) => item.user_id);
+  console.log("selectIds.value：",selectIds.value)
 }
 
 // 重置密码

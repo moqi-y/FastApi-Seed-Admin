@@ -2,9 +2,10 @@ import os
 from datetime import datetime, timedelta
 from enum import Enum
 from random import random
+from typing import List
 
 from sqlalchemy.orm import defer
-from sqlmodel import select, Session, or_, desc, asc, func
+from sqlmodel import select, Session, or_, desc, asc, func, delete
 from app.core.security import verify_password, hash_password
 from app.crud.database import engine
 from app.models.user import User, Email
@@ -207,7 +208,7 @@ def get_code_by_email(email: str):
 
 # 分页查询
 async def get_users_page(query_user: QueryUserPage):
-    print("query_user:",query_user)
+    print("query_user:", query_user)
     try:
         # 1. 基础语句,加查询条件时必须stmt = stmt.where(...)，否则不会自动累积。
         # 排除password字段 defer(User.password)
@@ -260,5 +261,19 @@ async def get_users_page(query_user: QueryUserPage):
         return total, records
     except Exception as e:
         print(f"get_users_page() SQL_Error: {e}")
+    finally:
+        session.close()
+
+
+# 删除用户
+async def delete_users(user_ids: List[int]):
+    try:
+        for user_id in user_ids:
+            stmt = delete(User).where(User.user_id == user_id)
+            session.exec(stmt)
+        session.commit()
+        return True
+    except Exception as e:
+        print(f"delete_users() SQL_Error: {e}")
     finally:
         session.close()
