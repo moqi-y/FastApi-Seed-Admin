@@ -84,7 +84,7 @@ async def update_user_info(user: UserUpdate):
         result.nickname = user.nickname if user.nickname is not None else result.nickname  # 如果昵称不为空，则更新昵称
         result.avatar = user.avatar if user.avatar is not None else result.avatar
         result.gender = user.gender if user.gender is not None else result.gender
-        result.mobile = user.mobile if user.mobile is not None else result.mobile
+        result.phone = user.mobile if user.phone is not None else result.phone
         result.email = user.email if user.email is not None else result.email
         session.add(result)
         session.commit()

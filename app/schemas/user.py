@@ -43,7 +43,7 @@ class UserUpdate(BaseModel):
     nickname: str | None = None
     avatar: str | None = None
     gender: int | None = None
-    mobile: str | None = None
+    phone: str | None = None
     email: str | None = None
 
 
