@@ -13,13 +13,14 @@ class User(SQLModel, table=True):
     nickname: str | None = None
     gender: int | None = None
     avatar: str | None = None
-    mobile: str | None = None
+    phone: str | None = None
     # 密码，设置索引
     password: str
     # 邮箱，设置索引
     email: str | None = None
     # 创建时间，默认为当前时间25, email='jane.doe@example.com', active=False)
     created_at: datetime = Field(default=datetime.now())
+    status: int = Field(default=1)
 
 
 # 用户邮箱表

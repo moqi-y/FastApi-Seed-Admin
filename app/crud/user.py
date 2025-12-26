@@ -3,11 +3,12 @@ from datetime import datetime, timedelta
 from enum import Enum
 from random import random
 
-from sqlmodel import select, Session
+from sqlalchemy.orm import defer
+from sqlmodel import select, Session, or_, desc, asc, func
 from app.core.security import verify_password, hash_password
 from app.crud.database import engine
 from app.models.user import User, Email
-from app.schemas.user import UserUpdate, PasswordUpdate
+from app.schemas.user import UserUpdate, PasswordUpdate, QueryUserPage
 from app.utils.send_email import send_email
 
 session = Session(engine)
@@ -200,5 +201,64 @@ def get_code_by_email(email: str):
             return None
     except Exception as e:
         print(f"get_code_by_email() SQL_Error: {e}")
+    finally:
+        session.close()
+
+
+# 分页查询
+async def get_users_page(query_user: QueryUserPage):
+    print("query_user:",query_user)
+    try:
+        # 1. 基础语句,加查询条件时必须stmt = stmt.where(...)，否则不会自动累积。
+        # 排除password字段 defer(User.password)
+        base_stmt = select(User).options(defer(User.password))
+        # 2. 动态过滤
+        if query_user.keywords:
+            base_stmt = base_stmt.where(
+                or_(
+                    User.username.like(query_user.keywords),
+                    User.nickname.contains(query_user.keywords),
+                    User.phone.contains(query_user.keywords),
+                )
+            )
+        if query_user.dept_id:
+            base_stmt = base_stmt.where(User.dept_id == query_user.dept_id)
+        if query_user.status:
+            base_stmt = base_stmt.where(User.status == query_user.status)
+        if query_user.role_ids:
+            role_list = [int(r) for r in query_user.role_ids.split(",") if r.isdigit()]
+            base_stmt = base_stmt.where(User.role_id.in_(role_list))
+        # 创建时间范围（示例按天解析）
+        if query_user.created_at:
+            try:
+                start_str, end_str = query_user.create_time.split(",")
+                start_dt = datetime.strptime(start_str.strip(), "%Y-%m-%d")
+                end_dt = datetime.strptime(end_str.strip(), "%Y-%m-%d")
+                base_stmt = base_stmt.where(User.create_time >= start_dt, User.create_time <= end_dt)
+            except ValueError:
+                # 格式不对就忽略
+                pass
+        # 3. 排序
+        if query_user.field:
+            # 简单白名单，防止注入
+            allowed = {"deptId", "roleIds", "username", "nickname", "create_time"}
+            if query_user.field in allowed:
+                col = getattr(User, query_user.field)
+                base_stmt = (
+                    base_stmt.order_by(desc(col))
+                    if query_user.direction and query_user.direction.upper() == "DESC"
+                    else base_stmt.order_by(asc(col))
+                )
+        # 4. 分页
+        offset = (query_user.pageNum - 1) * query_user.pageSize
+        base_stmt = base_stmt.offset(offset).limit(query_user.pageSize)
+        # 总数total
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        total = session.exec(count_stmt).one()
+        # 5. 执行
+        records = session.exec(base_stmt).all()
+        return total, records
+    except Exception as e:
+        print(f"get_users_page() SQL_Error: {e}")
     finally:
         session.close()

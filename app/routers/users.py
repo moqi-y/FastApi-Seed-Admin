@@ -1,15 +1,13 @@
-import re
 from datetime import datetime
-
-from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks, Query
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus, get_code_by_email
+    send_email_code, SendStatus, get_code_by_email, get_users_page
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
-from app.schemas.response import SuccessResponse
-from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate
+from app.schemas.response import SuccessResponse, PaginationResponse
+from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage
 from app.utils.verification import check_email
 
 router = APIRouter()
@@ -170,3 +168,22 @@ async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_
         raise HTTPException(status_code=500, detail="修改失败")
     else:
         return SuccessResponse()
+
+
+# 获取用户分页列表
+@router.get("/page", summary="获取用户分页列表")
+async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    if queryUser.pageSize < 1:
+        raise HTTPException(status_code=400, detail="页码不能小于1")
+    if queryUser.pageNum < 1:
+        raise HTTPException(status_code=400, detail="每页数量不能小于1")
+    result = await get_users_page(queryUser)
+    if not result:
+        raise HTTPException(status_code=500, detail="获取失败")
+    else:
+        return PaginationResponse(data={
+            "total": result[0],
+            "list": result[1]
+        })

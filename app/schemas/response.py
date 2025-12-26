@@ -25,15 +25,20 @@ class ErrorResponse(BaseModel):
     message: str = "操作失败"  # 定义响应消息
 
 
+class PageData(BaseModel):
+    total: int  # 定义总条数
+    list: Any  # 定义列表数据
+
+
 # 定义一个分页响应的类
 class PaginationResponse(BaseModel):
     """
-    - code: int = 200           # 定义响应码为200
+    - code: int = "00000"        # 定义响应码为"00000"
     - message: str = "操作成功"  # 定义响应消息为success
-    - total: int                # 定义总条数
-    - list: Any                 # 定义列表数据
+    - data: PageData | None = None  # 定义响应数据为PageDate类型
+        * PageData[total]: int  # 定义总条数
+        * PageData[list]: Any  # 定义列表数据
     """
-    code: int | str = 200  # 定义响应码为200
+    code: int | str = "00000"  # 定义响应码为00000
     message: str = "操作成功"  # 定义响应消息为success
-    total: int  # 定义总条数
-    list: Any  # 定义列表数据
+    data: PageData | None = None  # 定义响应数据为任意类型

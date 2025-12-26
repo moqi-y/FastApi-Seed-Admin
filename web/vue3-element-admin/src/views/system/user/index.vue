@@ -3,12 +3,12 @@
   <div class="app-container">
     <el-row :gutter="20">
       <!-- 部门树 -->
-      <el-col :lg="4" :xs="24" class="mb-[12px]">
-        <DeptTree v-model="queryParams.deptId" @node-click="handleQuery" />
-      </el-col>
+      <!--      <el-col :lg="4" :xs="24" class="mb-[12px]">-->
+      <!--        <DeptTree v-model="queryParams.deptId" @node-click="handleQuery" />-->
+      <!--      </el-col>-->
 
       <!-- 用户列表 -->
-      <el-col :lg="20" :xs="24">
+      <el-col :lg="24" :xs="24">
         <!-- 搜索区域 -->
         <div class="search-container">
           <el-form ref="queryFormRef" :model="queryParams" :inline="true" label-width="auto">
@@ -28,22 +28,22 @@
                 clearable
                 style="width: 100px"
               >
-                <el-option label="正常" :value="1" />
-                <el-option label="禁用" :value="0" />
+                <el-option label="正常" :value="1"/>
+                <el-option label="禁用" :value="0"/>
               </el-select>
             </el-form-item>
 
-            <el-form-item label="创建时间">
-              <el-date-picker
-                v-model="queryParams.createTime"
-                :editable="false"
-                type="daterange"
-                range-separator="~"
-                start-placeholder="开始时间"
-                end-placeholder="截止时间"
-                value-format="YYYY-MM-DD"
-              />
-            </el-form-item>
+<!--            <el-form-item label="创建时间">-->
+<!--              <el-date-picker-->
+<!--                v-model="queryParams.created_at"-->
+<!--                :editable="false"-->
+<!--                type="daterange"-->
+<!--                range-separator="~"-->
+<!--                start-placeholder="开始时间"-->
+<!--                end-placeholder="截止时间"-->
+<!--                value-format="YYYY-MM-DD"-->
+<!--              />-->
+<!--            </el-form-item>-->
 
             <el-form-item class="search-buttons">
               <el-button type="primary" icon="search" @click="handleQuery">搜索</el-button>
@@ -97,17 +97,17 @@
             class="data-table__content"
             @selection-change="handleSelectionChange"
           >
-            <el-table-column type="selection" width="50" align="center" />
-            <el-table-column label="用户名" prop="username" />
-            <el-table-column label="昵称" width="150" align="center" prop="nickname" />
+            <el-table-column type="selection" width="50" align="center"/>
+            <el-table-column label="用户名" prop="username"/>
+            <el-table-column label="昵称" width="150" align="center" prop="nickname"/>
             <el-table-column label="性别" width="100" align="center">
               <template #default="scope">
-                <DictLabel v-model="scope.row.gender" code="gender" />
+                <DictLabel v-model="scope.row.gender" code="gender"/>
               </template>
             </el-table-column>
-            <el-table-column label="部门" width="120" align="center" prop="deptName" />
-            <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
-            <el-table-column label="邮箱" align="center" prop="email" width="160" />
+            <el-table-column label="部门" width="120" align="center" prop="deptName"/>
+            <el-table-column label="手机号码" align="center" prop="mobile" width="120"/>
+            <el-table-column label="邮箱" align="center" prop="email" width="240"/>
             <el-table-column label="状态" align="center" prop="status" width="80">
               <template #default="scope">
                 <el-tag :type="scope.row.status == 1 ? 'success' : 'info'">
@@ -115,7 +115,11 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="创建时间" align="center" prop="createTime" width="150" />
+            <el-table-column label="创建时间" align="center" prop="created_at" width="180" sortable>
+              <template #default="scope">
+                <span>{{ dayjs(scope.row.created_at).format("YYYY-MM-DD HH:MM:ss") }}</span>
+              </template>
+            </el-table-column>
             <el-table-column label="操作" fixed="right" width="220">
               <template #default="scope">
                 <el-button
@@ -181,7 +185,7 @@
         </el-form-item>
 
         <el-form-item label="用户昵称" prop="nickname">
-          <el-input v-model="formData.nickname" placeholder="请输入用户昵称" />
+          <el-input v-model="formData.nickname" placeholder="请输入用户昵称"/>
         </el-form-item>
 
         <el-form-item label="所属部门" prop="deptId">
@@ -196,7 +200,7 @@
         </el-form-item>
 
         <el-form-item label="性别" prop="gender">
-          <Dict v-model="formData.gender" code="gender" />
+          <Dict v-model="formData.gender" code="gender"/>
         </el-form-item>
 
         <el-form-item label="角色" prop="roleIds">
@@ -211,11 +215,11 @@
         </el-form-item>
 
         <el-form-item label="手机号码" prop="mobile">
-          <el-input v-model="formData.mobile" placeholder="请输入手机号码" maxlength="11" />
+          <el-input v-model="formData.mobile" placeholder="请输入手机号码" maxlength="11"/>
         </el-form-item>
 
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
+          <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50"/>
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
@@ -239,20 +243,21 @@
     </el-drawer>
 
     <!-- 用户导入 -->
-    <UserImport v-model="importDialogVisible" @import-success="handleQuery()" />
+    <UserImport v-model="importDialogVisible" @import-success="handleQuery()"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from "@/store/modules/app.store";
-import { DeviceEnum } from "@/enums/settings/device.enum";
+import {useAppStore} from "@/store/modules/app.store";
+import {DeviceEnum} from "@/enums/settings/device.enum";
 
-import UserAPI, { UserForm, UserPageQuery, UserPageVO } from "@/api/system/user.api";
+import UserAPI, {UserForm, UserPageQuery, UserPageVO} from "@/api/system/user.api";
 import DeptAPI from "@/api/system/dept.api";
 import RoleAPI from "@/api/system/role.api";
 
 import DeptTree from "./components/DeptTree.vue";
 import UserImport from "./components/UserImport.vue";
+import {dayjs} from "element-plus";
 
 defineOptions({
   name: "User",
@@ -284,10 +289,10 @@ const formData = reactive<UserForm>({
 });
 
 const rules = reactive({
-  username: [{ required: true, message: "用户名不能为空", trigger: "blur" }],
-  nickname: [{ required: true, message: "用户昵称不能为空", trigger: "blur" }],
-  deptId: [{ required: true, message: "所属部门不能为空", trigger: "blur" }],
-  roleIds: [{ required: true, message: "用户角色不能为空", trigger: "blur" }],
+  username: [{required: true, message: "用户名不能为空", trigger: "blur"}],
+  nickname: [{required: true, message: "用户昵称不能为空", trigger: "blur"}],
+  deptId: [{required: true, message: "所属部门不能为空", trigger: "blur"}],
+  roleIds: [{required: true, message: "用户角色不能为空", trigger: "blur"}],
   email: [
     {
       pattern: /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/,
@@ -318,6 +323,7 @@ async function fetchData() {
   loading.value = true;
   try {
     const data = await UserAPI.getPage(queryParams);
+    console.log("data:", data)
     pageData.value = data.list;
     total.value = data.total;
   } finally {
@@ -336,7 +342,7 @@ function handleResetQuery() {
   queryFormRef.value.resetFields();
   queryParams.pageNum = 1;
   queryParams.deptId = undefined;
-  queryParams.createTime = undefined;
+  queryParams.created_at = undefined;
   fetchData();
 }
 
@@ -351,7 +357,7 @@ function hancleResetPassword(row: UserPageVO) {
     confirmButtonText: "确定",
     cancelButtonText: "取消",
   }).then(
-    ({ value }) => {
+    ({value}) => {
       if (!value || value.length < 6) {
         ElMessage.warning("密码至少需要6位字符，请重新输入");
         return false;
@@ -381,7 +387,7 @@ async function handleOpenDialog(id?: string) {
   if (id) {
     dialog.title = "修改用户";
     UserAPI.getFormData(id).then((data) => {
-      Object.assign(formData, { ...data });
+      Object.assign(formData, {...data});
     });
   } else {
     dialog.title = "新增用户";
@@ -470,7 +476,7 @@ function handleExport() {
     const fileType =
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8";
 
-    const blob = new Blob([fileData], { type: fileType });
+    const blob = new Blob([fileData], {type: fileType});
     const downloadUrl = window.URL.createObjectURL(blob);
 
     const downloadLink = document.createElement("a");
