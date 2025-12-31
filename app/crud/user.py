@@ -208,7 +208,6 @@ def get_code_by_email(email: str):
 
 # 分页查询
 async def get_users_page(query_user: QueryUserPage):
-    print("query_user:", query_user)
     try:
         # 1. 基础语句,加查询条件时必须stmt = stmt.where(...)，否则不会自动累积。
         # 排除password字段 defer(User.password)

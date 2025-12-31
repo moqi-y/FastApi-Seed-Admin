@@ -1,9 +1,22 @@
 # 字典接口
 from fastapi import APIRouter
 
-from app.schemas.response import SuccessResponse
+from app.crud.dict import get_dict_list
+from app.schemas.response import SuccessResponse, PaginationResponse, PageData
 
 router = APIRouter()
+
+
+# 字典分页列表
+@router.get("/page", summary="字典分页列表")
+async def root(pageNum: int = 1, pageSize: int = 10, keyword: str | None = None):
+    total, records = await get_dict_list(pageNum, pageSize, keyword)
+    return PaginationResponse(
+        data=PageData(
+            list=records,
+            total=total,
+        )
+    )
 
 
 @router.get("/{dictCode}/items", summary="字典查询")

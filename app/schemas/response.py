@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from pydantic import BaseModel
 
@@ -26,8 +26,8 @@ class ErrorResponse(BaseModel):
 
 
 class PageData(BaseModel):
-    total: int  # 定义总条数
-    list: Any  # 定义列表数据
+    total: int = 0  # 定义总条数
+    list: Any = []  # 定义列表数据
 
 
 # 定义一个分页响应的类
@@ -41,4 +41,4 @@ class PaginationResponse(BaseModel):
     """
     code: int | str = "00000"  # 定义响应码为00000
     message: str = "操作成功"  # 定义响应消息为success
-    data: PageData | None = None  # 定义响应数据为任意类型
+    data: PageData = PageData()  # 定义响应数据为任意类型

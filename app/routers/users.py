@@ -6,7 +6,7 @@ from app.crud.user import get_user_by_username, update_user_info, get_user_by_id
     send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
-from app.schemas.response import SuccessResponse, PaginationResponse
+from app.schemas.response import SuccessResponse, PaginationResponse, PageData
 from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage
 from app.utils.verification import check_email
 
@@ -183,10 +183,10 @@ async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_c
     if not result:
         raise HTTPException(status_code=500, detail="获取失败")
     else:
-        return PaginationResponse(data={
-            "total": result[0],
-            "list": result[1]
-        })
+        return PaginationResponse(data=PageData(
+            total=result[0],
+            list=result[1]
+        ))
 
 
 # 删除用户
