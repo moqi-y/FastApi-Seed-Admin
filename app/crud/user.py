@@ -9,10 +9,10 @@ from sqlmodel import select, Session, or_, desc, asc, func, delete
 from app.core.security import verify_password, hash_password
 from app.crud.database import engine
 from app.crud.role import get_role_by_name
-from app.crud.user_role import add_user_role
+from app.crud.user_role import add_user_role, update_user_role
 from app.models.user import User, Email
 from app.schemas.user import UserUpdate, PasswordUpdate, QueryUserPage
-from app.schemas.user_role import UserRoleCreate
+from app.schemas.user_role import UserRoleCreate, UserRoleUpdate
 from app.utils.send_email import send_email
 
 session = Session(engine)
@@ -97,6 +97,9 @@ async def update_user_info(user: UserUpdate):
         session.add(result)
         session.commit()
         session.refresh(result)
+        for roleName in user.roleIds:
+            role_info = await get_role_by_name(roleName)
+            _role = await update_user_role(UserRoleUpdate(user_id=result.id, role_id=role_info.id))
         return True
     except Exception as e:
         print(f"SQL_Error: {e}")

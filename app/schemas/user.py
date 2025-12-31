@@ -49,6 +49,7 @@ class UserUpdate(BaseModel):
     gender: int | None = None
     phone: str | None = None
     email: str | None = None
+    roleIds: List[Any] = []
 
 
 class PasswordUpdate(BaseModel):

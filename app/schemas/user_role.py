@@ -7,6 +7,6 @@ class UserRoleCreate(BaseModel):
 
 
 class UserRoleUpdate(BaseModel):
-    user_role_id: int
+    user_role_id: int | None = None
     user_id: int
     role_id: int

@@ -4,6 +4,7 @@ from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
     send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users, create_user
+from app.crud.user_role import get_role_name_by_user_id
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
 from app.schemas.response import SuccessResponse, PaginationResponse, PageData
@@ -45,30 +46,27 @@ async def get_user(username: str):
     })
 
 
-# 通过用户id查询用户信息
-@router.get("/userinfo", response_model=SuccessResponse, summary="通过用户id查询用户信息")
+# 用户表单数据
+@router.get("/{user_id}/form", response_model=SuccessResponse, summary="通过用户id查询用户信息")
 async def root(user_id: int):
     user = get_user_by_id(user_id)
+    role_names = await get_role_name_by_user_id(user_id)
+    print("role_names：",role_names)
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在")
     return SuccessResponse(data={
-        "user_id": user.user_id,
-        "username": user.username,
-        "email": user.email
+        **user.dict(exclude={"password"}),  # 排除密码字段
+        "roleIds": role_names
     })
 
 
 # 更新用户信息
-@router.put("/userinfo", response_model=SuccessResponse, summary="更新用户全部信息")
-async def update_user(user_id: int, user: UserIn):
-    user = update_user_info(user_id, user.username, user.password, user.email)
-    if not user:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return SuccessResponse(data={
-        "user_id": user.user_id,
-        "username": user.username,
-        "email": user.email
-    })
+@router.put("/{user_id}", response_model=SuccessResponse, summary="更新用户全部信息")
+async def update_user(user: UserUpdate = Body(...)):
+    user = await update_user_info(user)
+    if user:
+        return SuccessResponse()
+    raise HTTPException(status_code=404, detail="用户不存在")
 
 
 # 获取个人中心用户信息
@@ -76,11 +74,11 @@ async def update_user(user_id: int, user: UserIn):
 async def root(current_user=Depends(get_current_user)):
     if not current_user:
         raise HTTPException(status_code=401, detail="未授权访问")
-    roles = await get_user_roles_codes(current_user.user_id)
+    roles = await get_user_roles_codes(current_user.id)
     role_info = await get_role_by_code(roles[0])
-    perms = await get_user_perm_codes(current_user.user_id)
+    perms = await get_user_perm_codes(current_user.id)
     return SuccessResponse(data={
-        "id": current_user.user_id,
+        "id": current_user.id,
         "username": current_user.username,
         "nickname": current_user.nickname,
         "avatar": current_user.avatar,
