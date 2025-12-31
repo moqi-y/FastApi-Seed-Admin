@@ -8,6 +8,7 @@ from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
 from app.schemas.response import SuccessResponse, PaginationResponse, PageData
 from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage
+from app.utils.str_to_list import str_to_int_list
 from app.utils.verification import check_email
 
 router = APIRouter()
@@ -192,10 +193,7 @@ async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_c
 # 删除用户
 @router.delete("/{user_id}", summary="删除用户", description="用户ID列表，逗号分隔，如 1 或 2,3,4")
 async def root(user_id: str, current_user=Depends(get_current_user)):
-    # 将string转换为list
-    user_id_list = user_id.split(",")
-    # 数组元素转为int
-    user_id_list = [int(i) for i in user_id_list]
+    user_id_list = str_to_int_list(user_id)
     if not current_user:
         raise HTTPException(status_code=401, detail="未授权访问")
     result = await delete_users(user_id_list)

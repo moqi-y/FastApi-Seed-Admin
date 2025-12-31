@@ -62,5 +62,6 @@ def router_config(app):
     app.include_router(
         dicts.router,
         prefix="/api/v1/dicts",  # 路径名
-        tags=["dicts"]  # 文档标签名
+        tags=["dicts"],  # 文档标签名
+        dependencies=[Depends(get_current_user)]
     )
