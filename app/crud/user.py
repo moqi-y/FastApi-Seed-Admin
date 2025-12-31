@@ -8,24 +8,31 @@ from sqlalchemy.orm import defer
 from sqlmodel import select, Session, or_, desc, asc, func, delete
 from app.core.security import verify_password, hash_password
 from app.crud.database import engine
+from app.crud.role import get_role_by_name
+from app.crud.user_role import add_user_role
 from app.models.user import User, Email
 from app.schemas.user import UserUpdate, PasswordUpdate, QueryUserPage
+from app.schemas.user_role import UserRoleCreate
 from app.utils.send_email import send_email
 
 session = Session(engine)
 
 
 # 新增用户
-def create_user(username: str, nickname: str, avatar: str, password: str, email: str):
+async def create_user(user):
     try:
         # 创建用户
-        user = User(username=username, nickname=nickname, avatar=avatar, password=password, email=email)
-        session.add(user)
+        new_user = User(username=user.username, nickname=user.nickname, avatar=user.avatar,
+                        email=user.email, phone=user.phone, password=hash_password("123456"))
+        session.add(new_user)
         session.commit()
-        session.refresh(user)
-        return user
+        session.refresh(new_user)
+        for roleName in user.roleIds:
+            role_info = await get_role_by_name(roleName)
+            _role = add_user_role(UserRoleCreate(user_id=new_user.id, role_id=role_info.id))
+        return new_user
     except Exception as e:
-        print("SQL_Error:", e)
+        print("create_user() SQL_Error:", e)
         return None
     finally:
         session.close()

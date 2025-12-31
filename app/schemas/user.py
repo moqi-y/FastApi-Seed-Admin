@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List, Any
 
 from pydantic import BaseModel
 
@@ -11,9 +12,12 @@ class Token(BaseModel):
 class UserCreate(BaseModel):
     username: str
     nickname: str
-    avatar: str | None
-    password: str
-    email: str | None
+    gender: int
+    avatar: str | None = None
+    phone: str | None = None
+    password: str | None = None
+    email: str | None = None
+    roleIds: List[Any] = []
 
 
 class UserOut(BaseModel):

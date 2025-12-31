@@ -33,7 +33,7 @@ async def add_user_role(user_role: UserRoleCreate):
         session.refresh(new_user_role)
         return new_user_role
     except Exception as e:
-        print("SQL Error: ", e)
+        print("add_user_role() SQL Error: ", e)
         return None
     finally:
         session.close()

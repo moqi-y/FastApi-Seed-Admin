@@ -9,12 +9,12 @@ from app.schemas.role import RoleCreate, RoleUpdate
 session = Session(engine)
 
 
-async def get_roles_list(pageNum, pageSize, keyword):
+async def get_roles_list(pageNum, pageSize, keywords):
     """获取角色列表"""
     try:
         roles = session.query(Role)
-        if keyword:
-            roles = roles.where(Role.role_name.like(f'%{keyword}%'))
+        if keywords:
+            roles = roles.where(Role.name.like(f'%{keywords}%'))
         roles = roles.all()
         total = len(roles)
         roles = roles[(pageNum - 1) * pageSize:pageNum * pageSize]
@@ -29,13 +29,38 @@ async def get_roles_list(pageNum, pageSize, keyword):
         session.close()
 
 
+# 通过角色名获取角色信息
+async def get_role_by_name(name):
+    try:
+        role = session.query(Role).filter(Role.name == name).first()
+        return role
+    except Exception as e:
+        print("SQL_Error:", e)
+        return None
+    finally:
+        session.close()
+
+
+# 角色下拉列表
+
+async def get_roles_options():
+    try:
+        roles = session.query(Role).all()
+        return roles
+    except Exception as e:
+        print("SQL_Error:", e)
+        return None
+    finally:
+        session.close()
+
+
 # 查询用户的所有角色编码
 async def get_user_roles_codes(user_id: int):
     """获取用户角色编码"""
     try:
         stmt = (
-            select(Role.role_code)  # 只选 role_code
-            .join(UserRole, Role.role_id == UserRole.role_id)  # 联表：角色 和 用户角色
+            select(Role.code)  # 只选 role_code
+            .join(UserRole, Role.id == UserRole.role_id)  # 联表：角色 和 用户角色
             .where(UserRole.user_id == user_id)  # 条件：用户ID
         )
         result = session.exec(stmt)  # 执行 SQL
@@ -51,7 +76,7 @@ async def get_user_roles_codes(user_id: int):
 async def get_role_by_id(role_id):
     print("get_role_by_id:", role_id)
     try:
-        query = select(Role).where(Role.role_id == role_id)
+        query = select(Role).where(Role.id == role_id)
         role = session.exec(query).first()
         return role
     except Exception as e:
@@ -64,7 +89,7 @@ async def get_role_by_id(role_id):
 # 根据role_code获取角色信息
 async def get_role_by_code(role_code):
     try:
-        query = select(Role).where(Role.role_code == role_code)
+        query = select(Role).where(Role.code == role_code)
         role = session.exec(query).first()
         return role
     except Exception as e:
@@ -78,15 +103,15 @@ async def add_role(roles: RoleCreate):
     """添加角色"""
     try:
         # 判断角色名是否已存在
-        query = select(Role).where(Role.role_name == roles.role_name)
+        query = select(Role).where(Role.name == roles.role_name)
         role = session.exec(query).first()
         if role:
             return None
         role = Role(
-            role_name=roles.role_name,
-            role_code=roles.role_code,
-            role_status=roles.role_status,
-            role_desc=roles.role_desc
+            name=roles.role_name,
+            code=roles.role_code,
+            status=roles.role_status,
+            desc=roles.role_desc
         )
         session.add(role)
         session.commit()
@@ -122,7 +147,7 @@ async def update_role(roles: RoleUpdate):
 async def delete_role(role_id: int):
     """删除角色"""
     try:
-        query = select(Role).where(Role.role_id == role_id)
+        query = select(Role).where(Role.id == role_id)
         role = session.exec(query).first()
         if not role:
             return None

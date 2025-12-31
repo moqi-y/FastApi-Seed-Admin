@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.crud.role import get_roles_list, add_role, update_role, delete_role
+from app.crud.role import get_roles_list, add_role, update_role, delete_role, get_roles_options
 from app.schemas.response import *
 from app.schemas.role import RoleCreate, RoleUpdate
 
@@ -42,3 +42,12 @@ async def root(role_id: int):
     if result:
         return SuccessResponse(message="删除成功", data=result)
     raise HTTPException(status_code=400, detail="删除失败, 角色不存在")
+
+
+# 角色下拉列表
+@router.get("/options", summary="角色下拉列表")
+async def root():
+    result = await get_roles_options()
+    if result:
+        return SuccessResponse(message="查询成功", data=result)
+    raise HTTPException(status_code=400, detail="查询失败")

@@ -188,16 +188,16 @@
           <el-input v-model="formData.nickname" placeholder="请输入用户昵称"/>
         </el-form-item>
 
-        <el-form-item label="所属部门" prop="deptId">
-          <el-tree-select
-            v-model="formData.deptId"
-            placeholder="请选择所属部门"
-            :data="deptOptions"
-            filterable
-            check-strictly
-            :render-after-expand="false"
-          />
-        </el-form-item>
+<!--        <el-form-item label="所属部门" prop="deptId">-->
+<!--          <el-tree-select-->
+<!--            v-model="formData.deptId"-->
+<!--            placeholder="请选择所属部门"-->
+<!--            :data="deptOptions"-->
+<!--            filterable-->
+<!--            check-strictly-->
+<!--            :render-after-expand="false"-->
+<!--          />-->
+<!--        </el-form-item>-->
 
         <el-form-item label="性别" prop="gender">
           <Dict v-model="formData.gender" code="gender"/>
@@ -207,9 +207,9 @@
           <el-select v-model="formData.roleIds" multiple placeholder="请选择">
             <el-option
               v-for="item in roleOptions"
-              :key="item.value"
+              :key="item.label"
               :label="item.label"
-              :value="item.value"
+              :value="item.name"
             />
           </el-select>
         </el-form-item>
@@ -382,7 +382,7 @@ async function handleOpenDialog(id?: string) {
   // 加载角色下拉数据源
   roleOptions.value = await RoleAPI.getOptions();
   // 加载部门下拉数据源
-  deptOptions.value = await DeptAPI.getOptions();
+  // deptOptions.value = await DeptAPI.getOptions();
 
   if (id) {
     dialog.title = "修改用户";

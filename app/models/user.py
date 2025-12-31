@@ -8,7 +8,7 @@ class User(SQLModel, table=True):
     __tablename__ = "sys_user"
     # 用户ID
     id: int = Field(default=None, primary_key=True, index=True, description="用户ID",
-                         sa_column_kwargs={"name": "user_id"})
+                    sa_column_kwargs={"name": "user_id"})
     # 用户名，设置索引
     username: str = Field(index=True)
     nickname: str | None = None

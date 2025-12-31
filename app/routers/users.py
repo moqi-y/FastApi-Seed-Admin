@@ -3,11 +3,11 @@ from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks, Qu
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users
+    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users, create_user
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
 from app.schemas.response import SuccessResponse, PaginationResponse, PageData
-from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage
+from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage, UserCreate
 from app.utils.str_to_list import str_to_int_list
 from app.utils.verification import check_email
 
@@ -17,10 +17,10 @@ router = APIRouter()
 # 获取用户信息
 @router.get("/me", summary="获取当前用户信息")
 async def get_me(current_user=Depends(get_current_user)):
-    roles = await get_user_roles_codes(current_user.user_id)
-    perms = await get_user_perm_codes(current_user.user_id)
+    roles = await get_user_roles_codes(current_user.id)
+    perms = await get_user_perm_codes(current_user.id)
     user = {
-        "userId": current_user.user_id,
+        "userId": current_user.id,
         "username": current_user.username,
         "nickname": current_user.nickname,
         "avatar": current_user.avatar,
@@ -188,6 +188,18 @@ async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_c
             total=result[0],
             list=result[1]
         ))
+
+
+# 新增用户
+@router.post("", summary="新增用户")
+async def root(user: UserCreate, current_user=Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="未授权访问")
+    result = await create_user(user)
+    if not result:
+        raise HTTPException(status_code=500, detail="新增失败")
+    else:
+        return SuccessResponse()
 
 
 # 删除用户
