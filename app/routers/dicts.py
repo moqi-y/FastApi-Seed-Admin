@@ -1,8 +1,8 @@
 # 字典接口
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 
-from app.crud.dict import get_dict_list, add_dict, delete_dict
-from app.schemas.dict import AddDict
+from app.crud.dict import get_dict_list, add_dict, delete_dict, get_dict_form_data, update_dict
+from app.schemas.dict import AddDict, UpdateDict
 from app.schemas.response import SuccessResponse, PaginationResponse, PageData
 from app.utils.str_to_list import str_to_int_list
 
@@ -19,6 +19,16 @@ async def root(pageNum: int = 1, pageSize: int = 10, keywords: str | None = None
             total=total,
         )
     )
+
+
+# 字典表单数据
+@router.get("/{id}/form", summary="字典表单数据")
+async def root(id: int):
+    result = await get_dict_form_data(id)
+    if result:
+        return SuccessResponse(data=result)
+    else:
+        return SuccessResponse(code=400, message="获取失败")
 
 
 # 新增字典
@@ -46,6 +56,16 @@ async def root(dictCode: str):
             "tagType": "primary"
         }
     ])
+
+
+# 修改字典
+@router.put("/{dict_id}", summary="修改字典")
+async def root(dict_id: str, dict_data: UpdateDict = Body(...)):
+    result = await update_dict(dict_id, dict_data)
+    if result:
+        return SuccessResponse()
+    else:
+        return SuccessResponse(code=400, message="修改失败")
 
 
 # 删除字典

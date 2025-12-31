@@ -1,9 +1,9 @@
 from typing import List
 
-from sqlmodel import Session, select, or_, delete
+from sqlmodel import Session, select, or_, delete,update
 from app.crud.database import engine
 from app.models.dict import Dict
-from app.schemas.dict import AddDict
+from app.schemas.dict import AddDict, UpdateDict
 
 session = Session(engine)
 
@@ -50,6 +50,33 @@ async def add_dict(dict_data: AddDict):
     except Exception as e:
         session.rollback()
         print("add_dict() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+# 获取字典表单数据
+async def get_dict_form_data(id: int):
+    try:
+        stmt = select(Dict).where(Dict.id == id)
+        result = session.exec(stmt).first()
+        return result
+    except Exception as e:
+        print("get_dict_form_data() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+# 更新字典
+async def update_dict(dict_id, dict_data: UpdateDict):
+    try:
+        stmt = update(Dict).where(Dict.id == dict_id).values(name=dict_data.name, dictCode=dict_data.dictCode,
+                                                             status=dict_data.status, remark=dict_data.remark)
+        session.exec(stmt)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        print("update_dict() SQL Error: ", e)
     finally:
         session.close()
 
