@@ -51,7 +51,7 @@ def get_user_by_id(user_id: int):
     try:
         # 查询用户，如果不存在则返回 None
         user = session.exec(
-            select(User).where(User.user_id == user_id)
+            select(User).where(User.id == user_id)
         ).first()
         return user
     except Exception as e:
@@ -80,7 +80,7 @@ def authenticate_user(username: str, password: str):
 async def update_user_info(user: UserUpdate):
     try:
         # 更新用户信息
-        result = session.exec(select(User).where(User.user_id == user.id)).one()
+        result = session.exec(select(User).where(User.id == user.id)).one()
         result.username = user.username if user.username is not None else result.username  # 如果用户名不为空，则更新用户名
         result.nickname = user.nickname if user.nickname is not None else result.nickname  # 如果昵称不为空，则更新昵称
         result.avatar = user.avatar if user.avatar is not None else result.avatar
@@ -117,7 +117,7 @@ async def update_user_password(password: PasswordUpdate, user_id: int):
         if password.oldPassword is None or password.oldPassword == "":
             return PasswordStatus.oldPasswordError
         # 获取用户信息
-        result = session.exec(select(User).where(User.user_id == user_id)).one()
+        result = session.exec(select(User).where(User.id == user_id)).one()
         # 校验原始密码是否正确
         if not verify_password(password.oldPassword, result.password):
             return PasswordStatus.oldPasswordError
@@ -268,7 +268,7 @@ async def get_users_page(query_user: QueryUserPage):
 async def delete_users(user_ids: List[int]):
     try:
         for user_id in user_ids:
-            stmt = delete(User).where(User.user_id == user_id)
+            stmt = delete(User).where(User.id == user_id)
             session.exec(stmt)
         session.commit()
         return True

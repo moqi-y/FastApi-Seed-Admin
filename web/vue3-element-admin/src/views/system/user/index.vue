@@ -148,7 +148,7 @@
                   icon="delete"
                   link
                   size="small"
-                  @click="handleDelete(scope.row.user_id)"
+                  @click="handleDelete(scope.row.id)"
                 >
                   删除
                 </el-button>
@@ -347,7 +347,7 @@ function handleResetQuery() {
 
 // 选中项发生变化
 function handleSelectionChange(selection: any[]) {
-  selectIds.value = selection.map((item) => item.user_id);
+  selectIds.value = selection.map((item) => item.id);
   console.log("selectIds.value：",selectIds.value)
 }
 
