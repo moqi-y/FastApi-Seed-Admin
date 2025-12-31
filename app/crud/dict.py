@@ -1,8 +1,9 @@
 from typing import List
 
-from sqlmodel import Session, select, or_, delete,update
+from sqlmodel import Session, select, or_, delete, update, insert
 from app.crud.database import engine
 from app.models.dict import Dict
+from app.models.dict_data import DictData
 from app.schemas.dict import AddDict, UpdateDict
 
 session = Session(engine)
@@ -92,5 +93,80 @@ async def delete_dict(dict_id: List[int]):
     except Exception as e:
         session.rollback()
         print("delete_dict() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+"""字典项"""
+
+
+# 新增字典项
+async def add_dict_item(dict_code, dict_item):
+    try:
+        new_dict_item = DictData(
+            dictCode=dict_code, value=dict_item.value,
+            label=dict_item.label, sort=dict_item.sort,
+            status=dict_item.status, tagType=dict_item.tagType
+        )
+        session.add(new_dict_item)
+        session.commit()
+        return True
+    except Exception as e:
+        session.rollback()
+        print("add_dict_item() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+async def get_dict_item_page(dict_code, pageNum, pageSize, keywords):
+    try:
+        stmt = select(DictData).where(DictData.dictCode == dict_code)
+        if keywords:
+            stmt = stmt.where(or_(DictData.value.like(f"%{keywords}%"), DictData.label.like(f"%{keywords}%")))
+        total = len(session.exec(stmt).all())
+        records = session.exec(stmt.limit(pageSize).offset((pageNum - 1) * pageSize)).all()
+        return total, records
+    except Exception as e:
+        print("get_dict_item_page() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+# 字典项表单数据
+async def get_dict_item_form(dict_code, dict_item_id):
+    try:
+        stmt = select(DictData).where(DictData.dictCode == dict_code, DictData.id == dict_item_id)
+        return session.exec(stmt).first()
+    except Exception as e:
+        print("get_dict_item_form() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+async def update_dict_item(dict_code, itemId, dict_item):
+    try:
+        stmt = (update(DictData).where(DictData.dictCode == dict_code, DictData.id == itemId)
+                .values(dictCode=dict_item.dictCode, value=dict_item.value, label=dict_item.label,
+                        sort=dict_item.sort, status=dict_item.status))
+        session.exec(stmt)
+        session.commit()
+        session.flush()
+        return True
+    except Exception as e:
+        print("update_dict_item() SQL Error: ", e)
+    finally:
+        session.close()
+
+
+# 删除字典项
+async def delete_dict_item(dict_code, itemId):
+    try:
+        stmt = delete(DictData).where(DictData.dictCode == dict_code, DictData.id == itemId)
+        session.exec(stmt)
+        session.commit()
+        session.flush()
+        return True
+    except Exception as e:
+        print("delete_dict_item() SQL Error: ", e)
     finally:
         session.close()
