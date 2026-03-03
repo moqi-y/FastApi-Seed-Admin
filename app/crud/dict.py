@@ -67,6 +67,15 @@ async def get_dict_form_data(id: int):
         session.close()
 
 
+async def get_dict_data_list(dict_code):
+    try:
+        stmt = select(DictData).where(DictData.dictCode == dict_code)
+        return session.exec(stmt).all()
+    except Exception as e:
+        print("get_dict_data_list() SQL Error: ", e)
+    finally:
+        session.close()
+
 # 更新字典
 async def update_dict(dict_id, dict_data: UpdateDict):
     try:

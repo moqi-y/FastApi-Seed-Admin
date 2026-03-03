@@ -44,19 +44,8 @@ async def root(dict_data: AddDict):
 
 @router.get("/{dictCode}/items", summary="字典查询")
 async def root(dictCode: str):
-    # TODO: 查询字典数据
-    return SuccessResponse(data=[
-        {
-            "value": "1",
-            "label": "男",
-            "tagType": "primary"
-        },
-        {
-            "value": "2",
-            "label": "女",
-            "tagType": "primary"
-        }
-    ])
+    dict_list = await get_dict_data_list(dictCode)
+    return SuccessResponse(data=dict_list)
 
 
 # 修改字典
