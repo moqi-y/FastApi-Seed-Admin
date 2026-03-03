@@ -9,7 +9,7 @@ create table sys_user
     password   VARCHAR(255)  not null COMMENT '加密密码',
     email      VARCHAR(100) COMMENT '邮箱地址',
     gender     integer COMMENT '性别：0-未知，1-男，2-女',
-    phone      VARCHAR(20) COMMENT '手机号码',
+    mobile    VARCHAR(20) COMMENT '手机号码',
     status     integer COMMENT '状态：0-禁用，1-启用',
     created_at DATETIME not null COMMENT '创建时间'
 );
