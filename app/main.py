@@ -52,3 +52,6 @@ app.middleware("http")(make_logging_middleware())
 
 #  静态文件配置
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+

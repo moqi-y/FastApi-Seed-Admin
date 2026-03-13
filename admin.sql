@@ -9,7 +9,7 @@ create table sys_user
     password   VARCHAR(255)  not null COMMENT '加密密码',
     email      VARCHAR(100) COMMENT '邮箱地址',
     gender     integer COMMENT '性别：0-未知，1-男，2-女',
-    mobile    VARCHAR(20) COMMENT '手机号码',
+    mobile      VARCHAR(20) COMMENT '手机号码',
     status     integer COMMENT '状态：0-禁用，1-启用',
     created_at DATETIME not null COMMENT '创建时间'
 );
@@ -20,7 +20,7 @@ create index ix_sys_user_user_id
 create index ix_sys_user_username
     on sys_user (username);
 
-INSERT INTO sys_user (user_id, username, nickname, avatar, password, email, created_at, gender, phone, status) VALUES (1, 'admin', '系统管理员', 'https://foruda.gitee.com/images/1723603502796844527/03cdca2a_716974.gif?imageView2/1/w/80/h/80', '$2b$12$07SliP2LHsdVMlrwzzVYhugm0UmB/xbWK8dqIuEHMFAcxB3Sjdw..', 'example.com', '2025-12-26 17:38:43.247202', 1, '13212345678', 1);
+INSERT INTO sys_user (user_id, username, nickname, avatar, password, email, created_at, gender, mobile, status) VALUES (1, 'admin', '系统管理员', 'https://foruda.gitee.com/images/1723603502796844527/03cdca2a_716974.gif?imageView2/1/w/80/h/80', '$2b$12$07SliP2LHsdVMlrwzzVYhugm0UmB/xbWK8dqIuEHMFAcxB3Sjdw..', 'example.com', '2025-12-26 17:38:43.247202', 1, '13212345678', 1);
 
 # 角色表
 create table sys_role
@@ -157,6 +157,7 @@ INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, titl
 INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (9, 1, 'Notice', '/notice', 'system/notice/index', null, '', '通知公告', 0, 1, 0, null, 8, null, null, null);
 INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (10, 0, '/codegen', '/codegen', 'Layout', null, 'menu', '系统工具', 0, 0, 0, null, 2, null, null, null);
 INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (11, 10, 'Codegen', '/codegen', 'codegen/index', null, 'code', '代码生成', 0, 1, 0, null, 1, null, null, null);
+INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (12, 1, 'DictData', '/system/dict-item', 'system/dict/dict-item', null, 'dict', '字典数据', 1, 0, 0, null, 1, null, null, null);
 
 # 验证码临时表
 create table captcha
