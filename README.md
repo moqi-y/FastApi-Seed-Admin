@@ -5,11 +5,10 @@
 ## 项目目录说明
 
 > - **web** - Web管理端目录
-    >
-- **vue3-element-admin** - 基于Vue3和Element Plus的后台管理前端项目目录。
+> - **vue3-element-admin** - 基于Vue3和Element Plus的后台管理前端项目目录。
+> - **app.py** - 应用的启动文件，使用`python app.py`命令启动应用。  
 > - **app** - 应用的主目录，包含应用的核心代码和逻辑。
-    >
-- **main.py** - 应用的入口文件（主程序），包含应用的初始化和启动逻辑。
+>  - **main.py** - 应用的主程序，包含应用的初始化和启动配置。
 >  - **dependencies.py** - 应用的依赖管理文件，包含应用的依赖项和配置。
 >  - **core** - 核心功能模块，可能包含应用的基础配置和核心逻辑。
 >  - **crud** - CRUD（创建、读取、更新、删除）操作模块，包含与数据库交互的基本操作。
@@ -19,11 +18,9 @@
 >  - **schemas** - 模式目录，包含 Pydantic 模型，用于数据验证和序列化。
 >  - **utils** - 工具函数目录，包含一些辅助函数和实用工具。
 >  - **external_services** - 外部服务目录，包含与外部服务交互的代码。
-     >
-- **file_uploader** - 文件上传目录，包含处理文件上传的代码。
->- **logs** - 日志目录，用于存放应用生成的日志文件。
-   >
-- **app.log** - 应用的日志文件，记录应用运行时的日志信息。
+>  - **file_uploader** - 文件上传目录，包含处理文件上传的代码。
+>  - **logs** - 日志目录，用于存放应用生成的日志文件。
+>    - **app.log** - 应用的日志文件，记录应用运行时的日志信息。
 >- **static** - 静态文件目录，用于存放静态资源，如上传的文件、图片等。
 >- **.env** - 环境变量文件，包含配置环境变量如数据库连接字符串等。
 >- **FastApi-Seed.db** - 数据库文件，存储应用的数据。
@@ -132,201 +129,10 @@ SENDER_PASSWORD="ABCDXXXXXX"
 ## 数据表创建与数据初始化
 
 ```bash
-# 用户表
-create table sys_user
-(
-    user_id    INTEGER  not null
-        primary key,
-    username   VARCHAR  not null,
-    nickname   VARCHAR,
-    avatar     VARCHAR,
-    password   VARCHAR  not null,
-    email      VARCHAR,
-    created_at DATETIME not null,
-    gender     integer,
-    phone      VARCHAR,
-    status     integer
-);
-
-create index ix_sys_user_user_id
-    on sys_user (user_id);
-
-create index ix_sys_user_username
-    on sys_user (username);
-
-INSERT INTO sys_user (user_id, username, nickname, avatar, password, email, created_at, gender, phone, status) VALUES (1, 'admin', '系统管理员', 'https://foruda.gitee.com/images/1723603502796844527/03cdca2a_716974.gif?imageView2/1/w/80/h/80', '$2b$12$07SliP2LHsdVMlrwzzVYhugm0UmB/xbWK8dqIuEHMFAcxB3Sjdw..', 'example.com', '2025-12-26 17:38:43.247202', 1, '13212345678', 1);
-
-# 角色表
-create table sys_role
-(
-    role_id     INTEGER  not null
-        primary key,
-    role_name   VARCHAR  not null,
-    role_code   VARCHAR  not null,
-    role_status INTEGER  not null,
-    role_desc   VARCHAR  not null,
-    create_time DATETIME not null,
-    update_time DATETIME not null
-);
-
-create index ix_sys_role_role_id
-    on sys_role (role_id);
-
-INSERT INTO sys_role (role_id, role_name, role_code, role_status, role_desc, create_time, update_time) VALUES (1, '管理员', 'admin', 1, '系统管理员', '2025-07-25 16:08:47.453241', '2025-07-25 16:08:47.453241');
-INSERT INTO sys_role (role_id, role_name, role_code, role_status, role_desc, create_time, update_time) VALUES (2, '普通用户', 'user', 1, '系统后台普通用户', '2025-07-30 11:34:51.342767', '2025-07-30 11:34:51.342767');
-
-# 权限表
-create table sys_permission
-(
-    permission_id INTEGER not null
-        primary key,
-    parent_id     INTEGER not null,
-    name          VARCHAR,
-    code          VARCHAR not null,
-    type          INTEGER not null,
-    path          VARCHAR,
-    icon          VARCHAR,
-    sort          INTEGER not null,
-    status        INTEGER,
-    desc          VARCHAR,
-    create_time   DATETIME,
-    update_time   DATETIME
-);
-
-create index ix_sys_permission_id
-    on sys_permission (permission_id);
-
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (1, 0, '系统管理', 'sys', 'M', '/system', null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (2, 1, '用户管理', 'sys:user', 'M', '/system/user', null, 10, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (3, 2, '查询用户', 'sys:user:query', 'C', null, null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (4, 2, '新增用户', 'sys:user:add', 'C', null, null, 2, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (5, 2, '编辑用户', 'sys:user:edit', 'C', null, null, 3, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (6, 2, '删除用户', 'sys:user:delete', 'C', null, null, 4, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (7, 2, '导出用户', 'sys:user:export', 'C', null, null, 5, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (8, 2, '导入用户', 'sys:user:import', 'C', null, null, 6, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (9, 2, '重置密码', 'sys:user:reset-password', 'C', null, null, 7, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (10, 1, '角色管理', 'sys:role', 'M', '/system/role', null, 20, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (11, 3, '查询角色', 'sys:role:query', 'C', null, null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (12, 3, '新增角色', 'sys:role:add', 'C', null, null, 2, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (13, 3, '编辑角色', 'sys:role:edit', 'C', null, null, 3, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, desc, create_time, update_time) VALUES (14, 3, '删除角色', 'sys:role:delete', 'C', null, null, 4, null, null, null, null);
-
-# 角色权限表
-create table sys_role_permission
-(
-    id            INTEGER  not null
-        primary key,
-    role_id       INTEGER  not null
-        references sys_role,
-    permission_id INTEGER  not null
-        references sys_permission (id),
-    created_at    DATETIME not null,
-    updated_at    DATETIME not null
-);
-
-create index ix_sys_role_permission_role_id
-    on sys_role_permission (role_id);
-
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (1, 1, 1, '2025-07-30 03:03:45', '2025-07-30 03:03:45');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (2, 1, 2, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (3, 1, 3, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (4, 1, 4, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (5, 1, 5, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (6, 1, 6, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (7, 1, 7, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (8, 1, 8, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (9, 1, 9, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (10, 1, 10, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (11, 1, 11, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (12, 1, 12, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (13, 1, 13, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-INSERT INTO sys_role_permission (id, role_id, permission_id, created_at, updated_at) VALUES (14, 1, 14, '2025-07-30 03:04:47', '2025-07-30 03:04:47');
-
-# 用户角色表
-create table sys_role_user
-(
-    user_role_id INTEGER  not null
-        primary key,
-    user_id      INTEGER  not null
-        references sys_user,
-    role_id      INTEGER  not null
-        references sys_role,
-    created_at   DATETIME not null,
-    updated_at   DATETIME not null
-);
-
-INSERT INTO sys_role_user (user_role_id, user_id, role_id, created_at, updated_at) VALUES (1, 1, 1, '2025-07-25 02:14:41.178058', '2025-07-25 02:14:41.178058');
-
-# 系统菜单表
-create table sys_menu
-(
-    id          INTEGER not null
-        primary key,
-    parent_id   INTEGER,
-    name        VARCHAR not null,
-    path        VARCHAR,
-    component   VARCHAR,
-    redirect    VARCHAR,
-    icon        VARCHAR,
-    title       VARCHAR,
-    hidden      integer not null,
-    keep_alive  INTEGER not null,
-    always_show INTEGER not null,
-    params      VARCHAR,
-    sort        INTEGER not null,
-    created_at  DATETIME,
-    updated_at  DATETIME,
-    is_deleted  INTEGER
-);
-
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (1, 0, '/system', '/system', 'Layout', '/system/user', 'system', '系统管理', 0, 0, 0, null, 1, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (2, 1, 'User', '/user', 'system/user/index', null, 'el-icon-User', '用户管理', 0, 1, 0, null, 1, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (3, 1, 'Role', '/role', 'system/role/index', null, 'role', '角色管理', 0, 1, 0, null, 2, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (4, 1, 'SysMenu', '/menu', 'system/menu/index', null, 'menu', '菜单管理', 0, 1, 0, null, 3, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (5, 1, 'Dept', '/dept', 'system/dept/index', null, 'tree', '部门管理', 0, 1, 0, null, 4, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (6, 1, 'Dict', '/dict', 'system/dict/index', null, 'dict', '字典管理', 0, 1, 0, null, 5, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (7, 1, 'Log', '/log', 'system/log/index', null, 'document', '系统日志', 0, 1, 0, null, 6, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (8, 1, 'Config', '/config', 'system/config/index', null, 'setting', '系统配置', 0, 1, 0, null, 7, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (9, 1, 'Notice', '/notice', 'system/notice/index', null, '', '通知公告', 0, 1, 0, null, 8, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (10, 0, '/codegen', '/codegen', 'Layout', null, 'menu', '系统工具', 0, 0, 0, null, 2, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (11, 10, 'Codegen', '/codegen', 'codegen/index', null, 'code', '代码生成', 0, 1, 0, null, 1, null, null, null);
-
-# 验证码临时表
-create table captcha
-(
-    id             INTEGER  not null
-        primary key,
-    captcha_key    VARCHAR  not null,
-    captcha_base64 VARCHAR  not null,
-    captcha_value  VARCHAR  not null,
-    expire_time    DATETIME not null,
-    create_time    DATETIME not null
-);
-
-create index ix_captcha_captcha_key
-    on captcha (captcha_key);
-
-# 邮箱验证码临时表
-create table email_code
-(
-    email_id    INTEGER  not null
-        primary key,
-    email       VARCHAR  not null,
-    code        VARCHAR  not null,
-    user_id     INTEGER  not null
-        references sys_user,
-    expire_time DATETIME not null,
-    create_time DATETIME not null
-);
-
-create index ix_email_code_email
-    on email_code (email);
-
-create index ix_email_code_email_id
-    on email_code (email_id);
-
-create index ix_email_code_user_id
-    on email_code (user_id);
+# 创建FastApi-Seed-Admin数据库
+create database FastApi-Seed-Admin;
+# 创建数据表
+# 执行项目根目录下的 /sql/admin.sql 数据库脚本文件,完成数据表的创建
 ```
 
 ## 启动项目
