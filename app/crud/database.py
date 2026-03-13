@@ -1,3 +1,5 @@
+from urllib.parse import quote_plus
+
 from dotenv import load_dotenv
 from sqlmodel import SQLModel, create_engine
 import os
@@ -5,15 +7,22 @@ import os
 # 加载 .env 文件
 load_dotenv()
 
+bool_mapping = {'True': True, 'False': False, 'true': True, 'false': False}
 # 连接数据库
 if os.getenv("SQL_TYPE") and os.getenv("SQL_TYPE") == "mysql":  # 如果SQL_TYPE为mysql，则连接mysql数据库
     # MySql
-    DATABASE_URL = f"mysql+pymysql://{os.getenv('MYSQL_USER')}:{os.getenv('MYSQL_PASSWORD')}@{os.getenv('MYSQL_HOST')}:{os.getenv('MYSQL_PORT')}/{os.getenv('MYSQL_DB')}"
-    engine = create_engine(DATABASE_URL, pool_recycle=3600, pool_pre_ping=True, echo=False)
+    DATABASE_URL = (f"mysql+pymysql://{os.getenv('MYSQL_USER')}"
+                    f":{quote_plus(os.getenv('MYSQL_PASSWORD'))}@{os.getenv('MYSQL_HOST')}"
+                    f":{os.getenv('MYSQL_PORT')}/{os.getenv('MYSQL_DB')}")
+    engine = create_engine(DATABASE_URL,
+                           pool_recycle=3600,
+                           pool_pre_ping=True,
+                           echo=bool_mapping.get(os.getenv("APP_DEBUG")))
 # 如果SQL_TYPE为sqlite，则连接sqlite数据库
 elif os.getenv("SQL_TYPE") and os.getenv("SQL_TYPE") == "sqlite":
     # sqlite
-    engine = create_engine(f"sqlite:///{os.getenv('SQLITE_FILE')}", echo=True)
+    engine = create_engine(f"sqlite:///{os.getenv('SQLITE_FILE')}",
+                           echo=bool_mapping.get(os.getenv("APP_DEBUG")))
 else:
     raise Exception("SQL_TYPE in '.env' must be mysql or sqlite")
 

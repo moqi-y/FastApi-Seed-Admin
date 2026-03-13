@@ -105,22 +105,22 @@
                 <DictLabel v-model="scope.row.gender" code="gender"/>
               </template>
             </el-table-column>
-            <el-table-column label="部门" width="120" align="center" prop="deptName"/>
-            <el-table-column label="手机号码" align="center" prop="mobile" width="120"/>
-            <el-table-column label="邮箱" align="center" prop="email" width="240"/>
-            <el-table-column label="状态" align="center" prop="status" width="80">
+<!--            <el-table-column label="部门" width="120" align="center" prop="deptName"/>-->
+            <el-table-column label="手机号码" align="center" prop="mobile"/>
+            <el-table-column label="邮箱" align="center" prop="email" />
+            <el-table-column label="状态" align="center" prop="status" min-width="80">
               <template #default="scope">
                 <el-tag :type="scope.row.status == 1 ? 'success' : 'info'">
                   {{ scope.row.status == 1 ? "正常" : "禁用" }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="创建时间" align="center" prop="created_at" width="180" sortable>
+            <el-table-column label="创建时间" align="center" prop="created_at" min-width="180" sortable>
               <template #default="scope">
                 <span>{{ dayjs(scope.row.created_at).format("YYYY-MM-DD HH:MM:ss") }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" fixed="right" width="220">
+            <el-table-column label="操作" fixed="right" width="230">
               <template #default="scope">
                 <el-button
                   v-hasPerm="'sys:user:reset-password'"

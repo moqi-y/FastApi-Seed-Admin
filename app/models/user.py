@@ -14,7 +14,7 @@ class User(SQLModel, table=True):
     nickname: str | None = None
     gender: int | None = None
     avatar: str | None = None
-    phone: str | None = None
+    mobile: str | None = None
     # 密码，设置索引
     password: str
     # 邮箱，设置索引

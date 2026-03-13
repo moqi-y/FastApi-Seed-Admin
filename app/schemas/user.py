@@ -47,7 +47,7 @@ class UserUpdate(BaseModel):
     nickname: str | None = None
     avatar: str | None = None
     gender: int | None = None
-    phone: str | None = None
+    mobile: str | None = None
     email: str | None = None
     roleIds: List[Any] = []
 

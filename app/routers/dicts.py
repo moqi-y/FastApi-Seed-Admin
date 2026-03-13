@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Body, HTTPException
 
 from app.crud.dict import get_dict_list, add_dict, delete_dict, get_dict_form_data, update_dict, add_dict_item, \
-    get_dict_item_page, get_dict_item_form, update_dict_item, delete_dict_item
+    get_dict_item_page, get_dict_item_form, update_dict_item, delete_dict_item, get_dict_data_list
 from app.schemas.dict import AddDict, UpdateDict, DictItem, AddDictItem
 from app.schemas.response import SuccessResponse, PaginationResponse, PageData
 from app.utils.str_to_list import str_to_int_list
