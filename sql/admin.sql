@@ -31,20 +31,20 @@ create table sys_role
 (
     role_id     INTEGER      not null
         primary key AUTO_INCREMENT COMMENT '角色ID',
-    role_name   VARCHAR(50)  not null COMMENT '角色名称',
-    role_code   VARCHAR(50)  not null COMMENT '角色编码（唯一标识）',
-    role_status INTEGER      not null COMMENT '状态：0-禁用，1-启用',
-    role_desc   VARCHAR(255) not null COMMENT '角色描述',
-    create_time DATETIME     not null COMMENT '创建时间',
-    update_time DATETIME     not null COMMENT '更新时间'
+    name   VARCHAR(50)  not null COMMENT '角色名称',
+    code   VARCHAR(50)  not null COMMENT '角色编码（唯一标识）',
+    status INTEGER      not null COMMENT '状态：0-禁用，1-启用',
+    description   VARCHAR(255) COMMENT '角色描述',
+    create_time DATETIME  COMMENT '创建时间',
+    update_time DATETIME  COMMENT '更新时间'
 );
 
 create index ix_sys_role_role_id
     on sys_role (role_id);
 
-INSERT INTO sys_role (role_id, role_name, role_code, role_status, role_desc, create_time, update_time)
+INSERT INTO sys_role (role_id, name, code, status, description, create_time, update_time)
 VALUES (1, '管理员', 'admin', 1, '系统管理员', '2025-07-25 16:08:47.453241', '2025-07-25 16:08:47.453241');
-INSERT INTO sys_role (role_id, role_name, role_code, role_status, role_desc, create_time, update_time)
+INSERT INTO sys_role (role_id, name, code, status, description, create_time, update_time)
 VALUES (2, '普通用户', 'user', 1, '系统后台普通用户', '2025-07-30 11:34:51.342767', '2025-07-30 11:34:51.342767');
 
 # 权限表

@@ -72,7 +72,7 @@
               size="small"
               link
               icon="edit"
-              @click="handleOpenDialog(scope.row.id)"
+              @click="handleOpenDialog(scope.row.roleId)"
             >
               编辑
             </el-button>
@@ -81,7 +81,7 @@
               size="small"
               link
               icon="delete"
-              @click="handleDelete(scope.row.id)"
+              @click="handleDelete(scope.row.roleId)"
             >
               删除
             </el-button>
@@ -114,14 +114,14 @@
           <el-input v-model="formData.code" placeholder="请输入角色编码" />
         </el-form-item>
 
-        <el-form-item label="数据权限" prop="dataScope">
-          <el-select v-model="formData.dataScope">
-            <el-option :key="1" label="全部数据" :value="1" />
-            <el-option :key="2" label="部门及子部门数据" :value="2" />
-            <el-option :key="3" label="本部门数据" :value="3" />
-            <el-option :key="4" label="本人数据" :value="4" />
-          </el-select>
-        </el-form-item>
+<!--        <el-form-item label="数据权限" prop="dataScope">-->
+<!--          <el-select v-model="formData.dataScope">-->
+<!--            <el-option :key="1" label="全部数据" :value="1" />-->
+<!--            <el-option :key="2" label="部门及子部门数据" :value="2" />-->
+<!--            <el-option :key="3" label="本部门数据" :value="3" />-->
+<!--            <el-option :key="4" label="本人数据" :value="4" />-->
+<!--          </el-select>-->
+<!--        </el-form-item>-->
 
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="formData.status">
@@ -266,7 +266,7 @@ const rules = reactive({
 
 // 选中的角色
 interface CheckedRole {
-  id?: string;
+  roleId?: string;
   name?: string;
 }
 const checkedRole = ref<CheckedRole>({});
@@ -305,7 +305,7 @@ function handleResetQuery() {
 
 // 行复选框选中
 function handleSelectionChange(selection: any) {
-  ids.value = selection.map((item: any) => item.id);
+  ids.value = selection.map((item: any) => item.roleId);
 }
 
 // 打开角色弹窗
@@ -326,7 +326,7 @@ function handleSubmit() {
   roleFormRef.value.validate((valid: any) => {
     if (valid) {
       loading.value = true;
-      const roleId = formData.id;
+      const roleId = formData.roleId;
       if (roleId) {
         RoleAPI.update(roleId, formData)
           .then(() => {
@@ -355,7 +355,7 @@ function handleCloseDialog() {
   roleFormRef.value.resetFields();
   roleFormRef.value.clearValidate();
 
-  formData.id = undefined;
+  formData.roleId = undefined;
   formData.sort = 1;
   formData.status = 1;
 }
@@ -390,12 +390,12 @@ function handleDelete(roleId?: number) {
 
 // 打开分配菜单权限弹窗
 async function handleOpenAssignPermDialog(row: RolePageVO) {
-  const roleId = row.id;
+  const roleId = row.roleId;
   if (roleId) {
     assignPermDialogVisible.value = true;
     loading.value = true;
 
-    checkedRole.value.id = roleId;
+    checkedRole.value.roleId = roleId;
     checkedRole.value.name = row.name;
 
     // 获取所有的菜单
@@ -415,7 +415,7 @@ async function handleOpenAssignPermDialog(row: RolePageVO) {
 
 // 分配菜单权限提交
 function handleAssignPermSubmit() {
-  const roleId = checkedRole.value.id;
+  const roleId = checkedRole.value.roleId;
   if (roleId) {
     const checkedMenuIds: number[] = permTreeRef
       .value!.getCheckedNodes(false, true)

@@ -5,23 +5,23 @@ from pydantic import BaseModel
 
 class Role(BaseModel):
     role_id: int
-    role_name: str
-    role_code: str
-    role_status: int | None = None
-    role_desc: str
+    name: str
+    code: str
+    status: int | None = None
+    description: str
     create_time: datetime
     update_time: datetime
 
 
 class RoleCreate(BaseModel):
-    role_name: str
-    role_code: str
-    role_status: int | None = None
-    role_desc: str
+    name: str
+    code: str
+    status: int | None = None
+    description: str
 
 
 class RoleUpdate(BaseModel):
-    role_name: str
-    role_code: str
-    role_status: int | None = None
-    role_desc: str
+    name: str
+    code: str
+    status: int | None = None
+    description: str

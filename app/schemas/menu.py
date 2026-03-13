@@ -18,7 +18,6 @@ class MenuOut(BaseModel):
     children: List["MenuOut"] = []
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 

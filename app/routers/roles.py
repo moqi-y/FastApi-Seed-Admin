@@ -1,23 +1,34 @@
 from fastapi import APIRouter, HTTPException
 
-from app.crud.role import get_roles_list, add_role, update_role, delete_role, get_roles_options
+from app.crud.role import get_roles_list, add_role, update_role, get_roles_options, get_role_by_id, \
+    delete_roles
 from app.schemas.response import *
 from app.schemas.role import RoleCreate, RoleUpdate
+from app.utils.str_to_list import str_to_int_list
 
 router = APIRouter()
 
 
 # 分页查找角色
-@router.get("/roles", summary="分页查找角色")
+@router.get("/page", summary="分页查找角色")
 async def root(pageNum: int = 1, pageSize: int = 10, keyword: str | None = None):
     roles = await get_roles_list(pageNum, pageSize, keyword)
     if roles:
-        return PaginationResponse(total=roles["total"], list=roles["list"])
+        return PaginationResponse(data=PageData(**roles))
+    raise HTTPException(status_code=400, detail="未找到角色")
+
+
+# 根据角色ID查找角色
+@router.get("/{role_id}/form", summary="根据角色ID查找角色")
+async def root(role_id: int):
+    roles = await get_role_by_id(role_id)
+    if roles:
+        return SuccessResponse(message="查询成功", data=roles)
     raise HTTPException(status_code=400, detail="未找到角色")
 
 
 # 新建角色
-@router.post("/roles", summary="新建角色")
+@router.post("", summary="新建角色")
 async def root(roles: RoleCreate):
     # 查找是否存在相同名字的角色
     result = await add_role(roles)
@@ -27,20 +38,21 @@ async def root(roles: RoleCreate):
 
 
 # 更新角色
-@router.put("/roles", summary="更新角色")
-async def root(roles: RoleUpdate):
-    result = await update_role(roles)
+@router.put("/{role_id}", summary="更新角色")
+async def root(roles: RoleUpdate, role_id: int):
+    result = await update_role(roles, role_id)
     if result:
         return SuccessResponse(message="更新成功", data=result)
     raise HTTPException(status_code=400, detail="更新失败, 角色不存在")
 
 
 # 删除角色
-@router.delete("/roles", summary="删除角色")
-async def root(role_id: int):
-    result = await delete_role(role_id)
+@router.delete("/{role_ids}", summary="删除角色")
+async def root(role_ids: str):
+    role_id_list = str_to_int_list(role_ids)
+    result = await delete_roles(role_id_list)
     if result:
-        return SuccessResponse(message="删除成功", data=result)
+        return SuccessResponse(message="删除成功")
     raise HTTPException(status_code=400, detail="删除失败, 角色不存在")
 
 

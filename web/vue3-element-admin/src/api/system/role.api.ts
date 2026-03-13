@@ -106,7 +106,7 @@ export interface RolePageQuery extends PageQuery {
 /** 角色分页对象 */
 export interface RolePageVO {
   /** 角色ID */
-  id?: string;
+  roleId?: string;
   /** 角色编码 */
   code?: string;
   /** 角色名称 */
@@ -124,7 +124,7 @@ export interface RolePageVO {
 /** 角色表单对象 */
 export interface RoleForm {
   /** 角色ID */
-  id?: string;
+  roleId?: string;
   /** 角色编码 */
   code?: string;
   /** 数据权限 */

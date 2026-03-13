@@ -10,7 +10,6 @@ def router_config(app):
         auth.router,
         prefix="/api/v1/auth",  # 路径名
         tags=["auth"]  # 文档标签名
-        # dependencies=[Depends(get_current_user)] #依赖
     )
 
     app.include_router(
@@ -31,7 +30,8 @@ def router_config(app):
     app.include_router(
         roles.router,
         prefix="/api/v1/roles",  # 路径名
-        tags=["roles"]  # 文档标签名
+        tags=["roles"],  # 文档标签名
+        dependencies=[Depends(get_current_user)]
     )
 
     app.include_router(

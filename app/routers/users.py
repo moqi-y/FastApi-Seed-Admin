@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 # 获取用户信息
-@router.get("/me", summary="获取当前用户信息")
+@router.get("/me", summary="获取当前用户信息", dependencies=[Depends(get_current_user)])
 async def get_me(current_user=Depends(get_current_user)):
     roles = await get_user_roles_codes(current_user.id)
     perms = await get_user_perm_codes(current_user.id)
@@ -34,7 +34,8 @@ async def get_me(current_user=Depends(get_current_user)):
 
 
 # 通过用户名查询用户信息
-@router.get("/userinfo/{username}", response_model=SuccessResponse, summary="通过用户名查询用户信息")
+@router.get("/userinfo/{username}", response_model=SuccessResponse, summary="通过用户名查询用户信息",
+            dependencies=[Depends(get_current_user)])
 async def get_user(username: str):
     user = get_user_by_username(username)
     if not user:
@@ -47,11 +48,11 @@ async def get_user(username: str):
 
 
 # 用户表单数据
-@router.get("/{user_id}/form", response_model=SuccessResponse, summary="通过用户id查询用户信息")
+@router.get("/{user_id}/form", response_model=SuccessResponse, summary="通过用户id查询用户信息",
+            dependencies=[Depends(get_current_user)])
 async def root(user_id: int):
     user = get_user_by_id(user_id)
     role_names = await get_role_name_by_user_id(user_id)
-    print("role_names：", role_names)
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在")
     return SuccessResponse(data={
@@ -61,7 +62,8 @@ async def root(user_id: int):
 
 
 # 更新用户信息
-@router.put("/{user_id}", response_model=SuccessResponse, summary="更新用户全部信息")
+@router.put("/{user_id}", response_model=SuccessResponse, summary="更新用户全部信息",
+            dependencies=[Depends(get_current_user)])
 async def update_user(user: UserUpdate = Body(...)):
     user = await update_user_info(user)
     if user:
@@ -70,10 +72,9 @@ async def update_user(user: UserUpdate = Body(...)):
 
 
 # 获取个人中心用户信息
-@router.get("/profile", response_model=SuccessResponse, summary="获取个人中心用户信息")
+@router.get("/profile", response_model=SuccessResponse, summary="获取个人中心用户信息",
+            dependencies=[Depends(get_current_user)])
 async def root(current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     roles = await get_user_roles_codes(current_user.id)
     role_info = await get_role_by_code(roles[0])
     perms = await get_user_perm_codes(current_user.id)
@@ -92,10 +93,8 @@ async def root(current_user=Depends(get_current_user)):
 
 
 # 个人中心修改用户信息
-@router.put("/profile", summary="个人中心修改用户信息")
+@router.put("/profile", summary="个人中心修改用户信息", dependencies=[Depends(get_current_user)])
 async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     user.id = current_user.user_id
     new_user = UserUpdate(**user.dict())
     result = await update_user_info(new_user)
@@ -105,10 +104,8 @@ async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_us
 
 
 # 修改密码
-@router.put("/password", summary="修改密码")
+@router.put("/password", summary="修改密码", dependencies=[Depends(get_current_user)])
 async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     result = await update_user_password(password, current_user.user_id)
     if not result:
         raise HTTPException(status_code=500, detail="修改失败")
@@ -125,11 +122,9 @@ async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_cu
 
 
 # 发送邮箱验证码（绑定或更换邮箱）
-@router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）")
+@router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）", dependencies=[Depends(get_current_user)])
 async def root(email: str, background_tasks: BackgroundTasks, current_user=Depends(get_current_user)):
     background_tasks.add_task(clean_email_code)
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     if not check_email(email):
         raise HTTPException(status_code=400, detail="邮箱格式错误")
     if current_user.email == email:
@@ -146,10 +141,8 @@ async def root(email: str, background_tasks: BackgroundTasks, current_user=Depen
 
 
 # 绑定或更换邮箱
-@router.put("/email", summary="绑定或更换邮箱")
+@router.put("/email", summary="绑定或更换邮箱", dependencies=[Depends(get_current_user)])
 async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     if not check_email(email.email):
         raise HTTPException(status_code=400, detail="邮箱格式错误")
     if not email.code:
@@ -170,10 +163,8 @@ async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_
 
 
 # 获取用户分页列表
-@router.get("/page", summary="获取用户分页列表")
+@router.get("/page", summary="获取用户分页列表", dependencies=[Depends(get_current_user)])
 async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     if queryUser.pageSize < 1:
         raise HTTPException(status_code=400, detail="页码不能小于1")
     if queryUser.pageNum < 1:
@@ -189,10 +180,8 @@ async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_c
 
 
 # 新增用户
-@router.post("", summary="新增用户")
+@router.post("", summary="新增用户", dependencies=[Depends(get_current_user)])
 async def root(user: UserCreate, current_user=Depends(get_current_user)):
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     result = await create_user(user)
     if not result:
         raise HTTPException(status_code=500, detail="新增失败")
@@ -201,11 +190,10 @@ async def root(user: UserCreate, current_user=Depends(get_current_user)):
 
 
 # 删除用户
-@router.delete("/{user_id}", summary="删除用户", description="用户ID列表，逗号分隔，如 1 或 2,3,4")
-async def root(user_id: str, current_user=Depends(get_current_user)):
+@router.delete("/{user_id}", summary="删除用户", dependencies=[Depends(get_current_user)],
+               description="用户ID列表，逗号分隔，如 1 或 2,3,4")
+async def root(user_id: str):
     user_id_list = str_to_int_list(user_id)
-    if not current_user:
-        raise HTTPException(status_code=401, detail="未授权访问")
     result = await delete_users(user_id_list)
     if not result:
         raise HTTPException(status_code=500, detail="删除失败")
@@ -214,9 +202,8 @@ async def root(user_id: str, current_user=Depends(get_current_user)):
 
 
 # 重置用户密码
-@router.put("/{user_id}/password/reset", summary="重置用户密码")
-async def root(user_id: int, password: str, current_user=Depends(get_current_user)):
-    print("current_user:", current_user)
+@router.put("/{user_id}/password/reset", summary="重置用户密码", dependencies=[Depends(get_current_user)])
+async def root(user_id: int, password: str):
     result = await reset_password(user_id, password)
     if not result:
         raise HTTPException(status_code=500, detail="重置失败")
