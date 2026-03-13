@@ -11,8 +11,8 @@ router = APIRouter()
 
 # 分页查找角色
 @router.get("/page", summary="分页查找角色")
-async def root(pageNum: int = 1, pageSize: int = 10, keyword: str | None = None):
-    roles = await get_roles_list(pageNum, pageSize, keyword)
+async def root(pageNum: int = 1, pageSize: int = 10, keywords: str | None = None):
+    roles = await get_roles_list(pageNum, pageSize, keywords)
     if roles:
         return PaginationResponse(data=PageData(**roles))
     raise HTTPException(status_code=400, detail="未找到角色")
