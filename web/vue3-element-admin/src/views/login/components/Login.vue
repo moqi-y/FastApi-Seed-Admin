@@ -12,7 +12,9 @@
       <el-form-item prop="username">
         <el-input v-model.trim="loginFormData.username" :placeholder="t('login.username')">
           <template #prefix>
-            <el-icon><User /></el-icon>
+            <el-icon>
+              <User/>
+            </el-icon>
           </template>
         </el-input>
       </el-form-item>
@@ -29,14 +31,16 @@
             @keyup.enter="handleLoginSubmit"
           >
             <template #prefix>
-              <el-icon><Lock /></el-icon>
+              <el-icon>
+                <Lock/>
+              </el-icon>
             </template>
           </el-input>
         </el-form-item>
       </el-tooltip>
 
       <!-- 验证码 -->
-      <el-form-item prop="captchaCode">
+      <el-form-item prop="captchaCode" v-if="loginFormData.isShow">
         <div flex>
           <el-input
             v-model.trim="loginFormData.captchaCode"
@@ -44,11 +48,13 @@
             @keyup.enter="handleLoginSubmit"
           >
             <template #prefix>
-              <div class="i-svg:captcha" />
+              <div class="i-svg:captcha"/>
             </template>
           </el-input>
           <div cursor-pointer h="[40px]" w="[120px]" flex-center ml-10px @click="getCaptcha">
-            <el-icon v-if="codeLoading" class="is-loading"><Loading/></el-icon>
+            <el-icon v-if="codeLoading" class="is-loading">
+              <Loading/>
+            </el-icon>
 
             <img
               v-else
@@ -65,9 +71,9 @@
 
       <div class="flex-x-between w-full">
         <el-checkbox v-model="loginFormData.rememberMe">{{ t("login.rememberMe") }}</el-checkbox>
-<!--        <el-link type="primary" underline="never" @click="toOtherForm('resetPwd')">-->
-<!--          {{ t("login.forgetPassword") }}-->
-<!--        </el-link>-->
+        <!--        <el-link type="primary" underline="never" @click="toOtherForm('resetPwd')">-->
+        <!--          {{ t("login.forgetPassword") }}-->
+        <!--        </el-link>-->
       </div>
 
       <!-- 登录按钮 -->
@@ -78,48 +84,48 @@
       </el-form-item>
     </el-form>
 
-<!--    <div flex-center gap-10px>-->
-<!--      <el-text size="default">{{ t("login.noAccount") }}</el-text>-->
-<!--      <el-link type="primary" underline="never" @click="toOtherForm('register')">-->
-<!--        {{ t("login.reg") }}-->
-<!--      </el-link>-->
-<!--    </div>-->
+    <!--    <div flex-center gap-10px>-->
+    <!--      <el-text size="default">{{ t("login.noAccount") }}</el-text>-->
+    <!--      <el-link type="primary" underline="never" @click="toOtherForm('register')">-->
+    <!--        {{ t("login.reg") }}-->
+    <!--      </el-link>-->
+    <!--    </div>-->
 
     <!-- 第三方登录 -->
-<!--    <div class="third-party-login">-->
-<!--      <div class="divider-container">-->
-<!--        <div class="divider-line"></div>-->
-<!--        <span class="divider-text">{{ t("login.otherLoginMethods") }}</span>-->
-<!--        <div class="divider-line"></div>-->
-<!--      </div>-->
-<!--      <div class="flex-center gap-x-5 w-full text-[var(&#45;&#45;el-text-color-secondary)]">-->
-<!--        <CommonWrapper>-->
-<!--          <div text-20px class="i-svg:wechat" />-->
-<!--        </CommonWrapper>-->
-<!--        <CommonWrapper>-->
-<!--          <div text-20px cursor-pointer class="i-svg:qq" />-->
-<!--        </CommonWrapper>-->
-<!--        <CommonWrapper>-->
-<!--          <div text-20px cursor-pointer class="i-svg:github" />-->
-<!--        </CommonWrapper>-->
-<!--        <CommonWrapper>-->
-<!--          <div text-20px cursor-pointer class="i-svg:gitee" />-->
-<!--        </CommonWrapper>-->
-<!--      </div>-->
-<!--    </div>-->
+    <!--    <div class="third-party-login">-->
+    <!--      <div class="divider-container">-->
+    <!--        <div class="divider-line"></div>-->
+    <!--        <span class="divider-text">{{ t("login.otherLoginMethods") }}</span>-->
+    <!--        <div class="divider-line"></div>-->
+    <!--      </div>-->
+    <!--      <div class="flex-center gap-x-5 w-full text-[var(&#45;&#45;el-text-color-secondary)]">-->
+    <!--        <CommonWrapper>-->
+    <!--          <div text-20px class="i-svg:wechat" />-->
+    <!--        </CommonWrapper>-->
+    <!--        <CommonWrapper>-->
+    <!--          <div text-20px cursor-pointer class="i-svg:qq" />-->
+    <!--        </CommonWrapper>-->
+    <!--        <CommonWrapper>-->
+    <!--          <div text-20px cursor-pointer class="i-svg:github" />-->
+    <!--        </CommonWrapper>-->
+    <!--        <CommonWrapper>-->
+    <!--          <div text-20px cursor-pointer class="i-svg:gitee" />-->
+    <!--        </CommonWrapper>-->
+    <!--      </div>-->
+    <!--    </div>-->
   </div>
 </template>
 <script setup lang="ts">
-import type { FormInstance } from "element-plus";
-import { LocationQuery, RouteLocationRaw, useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import AuthAPI, { type LoginFormData } from "@/api/auth.api";
+import type {FormInstance} from "element-plus";
+import {LocationQuery, RouteLocationRaw, useRoute} from "vue-router";
+import {useI18n} from "vue-i18n";
+import AuthAPI, {type LoginFormData} from "@/api/auth.api";
 import router from "@/router";
-import { useUserStore } from "@/store";
+import {useUserStore} from "@/store";
 // import CommonWrapper from "@/components/CommonWrapper/index.vue";
-import { Auth } from "@/utils/auth";
+import {Auth} from "@/utils/auth";
 
-const { t } = useI18n();
+const {t} = useI18n();
 const userStore = useUserStore();
 const route = useRoute();
 
@@ -139,6 +145,7 @@ const loginFormData = ref<LoginFormData>({
   password: "123456",
   captchaKey: "",
   captchaCode: "",
+  isShow: false, // 是否显示验证码
   rememberMe,
 });
 
@@ -175,12 +182,14 @@ const loginRules = computed(() => {
 
 // 获取验证码
 const codeLoading = ref(false);
+
 function getCaptcha() {
   codeLoading.value = true;
   AuthAPI.getCaptcha()
     .then((data) => {
       loginFormData.value.captchaKey = data.captchaKey;
       captchaBase64.value = data.captchaBase64;
+      loginFormData.value.isShow = data.isShow;
     })
     .finally(() => (codeLoading.value = false));
 }
@@ -244,7 +253,7 @@ function resolveRedirectTarget(query: LocationQuery): RouteLocationRaw {
     };
   } catch {
     // 7. 异常处理：返回安全路径
-    return { path: defaultPath };
+    return {path: defaultPath};
   }
 }
 

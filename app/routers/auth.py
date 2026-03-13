@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from app.core.security import hash_password
@@ -11,6 +13,8 @@ from app.schemas.response import SuccessResponse, ErrorResponse
 from app.schemas.user import UserOut, UserCreate, Token
 
 router = APIRouter()
+
+bool_mapping = {'True': True, 'False': False, 'true': True, 'false': False}
 
 
 @router.post("/register", response_model=SuccessResponse, summary="注册新用户")
@@ -32,13 +36,14 @@ def register(user: UserCreate):
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), captchaKey: str = Body(..., embed=True),
                 captchaCode: str = Body(..., embed=True)):
     # 验证验证码
-    result = await verify_captcha(captchaKey, captchaCode.lower())
-    if result == CaptchaStatus.EXPIRED:
-        raise HTTPException(status_code=408, detail="验证码已过期")
-    elif result == CaptchaStatus.ERROR:
-        raise HTTPException(status_code=422, detail="验证码错误")
-    elif result == CaptchaStatus.INVALID:
-        raise HTTPException(status_code=400, detail="验证码无效")
+    if bool_mapping.get(os.getenv("USE_CAPTCHA")):
+        result = await verify_captcha(captchaKey, captchaCode.lower())
+        if result == CaptchaStatus.EXPIRED:
+            raise HTTPException(status_code=408, detail="验证码已过期")
+        elif result == CaptchaStatus.ERROR:
+            raise HTTPException(status_code=422, detail="验证码错误")
+        elif result == CaptchaStatus.INVALID:
+            raise HTTPException(status_code=400, detail="验证码无效")
     # 再验账号
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -73,5 +78,6 @@ async def root(background_tasks: BackgroundTasks):
     result = await generate_captcha()
     return SuccessResponse(data={
         "captchaKey": result["captcha_key"],
-        "captchaBase64": result["images_base64"]
+        "captchaBase64": result["images_base64"],
+        "isShow": bool_mapping.get(os.getenv("USE_CAPTCHA"))
     })

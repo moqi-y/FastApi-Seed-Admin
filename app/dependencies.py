@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from app.core.security import SECRET_KEY, ALGORITHM, create_access_token
@@ -19,15 +19,15 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         username = payload.get("sub")
         # 如果用户名为空，则抛出认证失败的异常
         if not username:
-            raise HTTPException(status_code=401, detail="认证失败")
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
     # 如果解码失败，则抛出令牌无效的异常
     except JWTError:
-        raise HTTPException(status_code=401, detail="令牌无效")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="令牌无效")
     # 根据用户名获取用户
     user = get_user_by_username(username=username)
     # 如果用户不存在，则抛出用户不存在的异常
     if not user:
-        raise HTTPException(status_code=404, detail="用户不存在")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
     # 返回用户
     return user
 

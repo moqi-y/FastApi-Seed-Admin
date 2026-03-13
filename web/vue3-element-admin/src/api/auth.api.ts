@@ -25,7 +25,7 @@ const AuthAPI = {
     return request<any, LoginResult>({
       url: `${AUTH_BASE_URL}/refresh-token`,
       method: "post",
-      params: { refreshToken },
+      params: {refreshToken},
       headers: {
         Authorization: "no-auth",
       },
@@ -61,6 +61,8 @@ export interface LoginFormData {
   captchaKey: string;
   /** 验证码 */
   captchaCode: string;
+  /** 是否使用验证码 */
+  isShow: boolean;
   /** 记住我 */
   rememberMe: boolean;
 }
@@ -83,4 +85,6 @@ export interface CaptchaInfo {
   captchaKey: string;
   /** 验证码图片Base64字符串 */
   captchaBase64: string;
+  /** 是否显示验证码 */
+  isShow: boolean;
 }
