@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks, Qu
 from app.crud.permission import get_user_perm_codes
 from app.crud.role import get_user_roles_codes, get_role_by_code
 from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users, create_user
+    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users, create_user, reset_password
 from app.crud.user_role import get_role_name_by_user_id
 from app.dependencies import get_current_user
 from app.middleware.background_tasks import clean_email_code
@@ -51,7 +51,7 @@ async def get_user(username: str):
 async def root(user_id: int):
     user = get_user_by_id(user_id)
     role_names = await get_role_name_by_user_id(user_id)
-    print("role_names：",role_names)
+    print("role_names：", role_names)
     if not user:
         raise HTTPException(status_code=404, detail="用户不存在")
     return SuccessResponse(data={
@@ -209,5 +209,16 @@ async def root(user_id: str, current_user=Depends(get_current_user)):
     result = await delete_users(user_id_list)
     if not result:
         raise HTTPException(status_code=500, detail="删除失败")
+    else:
+        return SuccessResponse()
+
+
+# 重置用户密码
+@router.put("/{user_id}/password/reset", summary="重置用户密码")
+async def root(user_id: int, password: str, current_user=Depends(get_current_user)):
+    print("current_user:", current_user)
+    result = await reset_password(user_id, password)
+    if not result:
+        raise HTTPException(status_code=500, detail="重置失败")
     else:
         return SuccessResponse()

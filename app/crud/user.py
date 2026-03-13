@@ -4,6 +4,7 @@ from enum import Enum
 from random import random
 from typing import List
 
+from fastapi import HTTPException
 from sqlalchemy.orm import defer
 from sqlmodel import select, Session, or_, desc, asc, func, delete
 from app.core.security import verify_password, hash_password
@@ -284,5 +285,19 @@ async def delete_users(user_ids: List[int]):
         return True
     except Exception as e:
         print(f"delete_users() SQL_Error: {e}")
+    finally:
+        session.close()
+
+
+# 重置用户密码
+async def reset_password(user_id: int, password: str):
+    try:
+        user = session.get(User, user_id)
+        user.password = hash_password(password)
+        session.commit()
+        return True
+    except Exception as e:
+        print(f"reset_password() SQL_Error: {e}")
+        raise HTTPException(status_code=500, detail="重置用户密码失败")
     finally:
         session.close()
