@@ -23,7 +23,7 @@ async def root(role_id: int, permission_id: int):
     raise HTTPException(status_code=404, detail="角色权限添加失败")
 
 
-@router.put("/update", summary="更新角色权限")
+@router.put("/update", summary="更新角色权限【弃用】")
 async def root(role_permission_id: int, role_id: int, permission_id: int):
     result = await update_role_permission(role_permission_id, role_id, permission_id)
     if result:

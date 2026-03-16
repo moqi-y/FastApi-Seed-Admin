@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.crud.role import get_roles_list, add_role, update_role, get_roles_options, get_role_by_id, \
     delete_roles
+from app.crud.role_perms import update_role_permission, get_role_menu_ids
 from app.schemas.response import *
 from app.schemas.role import RoleCreate, RoleUpdate
 from app.utils.str_to_list import str_to_int_list
@@ -63,3 +64,20 @@ async def root():
     if result:
         return SuccessResponse(message="查询成功", data=result)
     raise HTTPException(status_code=400, detail="查询失败")
+
+
+# 权限分配
+@router.put("/{role_id}/menus", summary="用户权限分配")
+async def root(role_id: int, permissions: List[int]):
+    print("role_id：", role_id, " permissions：", permissions)
+    result = await update_role_permission(role_id, permissions)
+    if result:
+        return SuccessResponse(message="更新成功")
+
+
+# 获取角色菜单权限
+@router.get("/{role_id}/menuIds", summary="获取角色菜单权限")
+async def root(role_id: int):
+    result = await get_role_menu_ids(role_id)
+    if result:
+        return SuccessResponse(message="查询成功", data=result)
