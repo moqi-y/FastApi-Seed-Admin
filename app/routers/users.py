@@ -87,8 +87,8 @@ async def root(current_user=Depends(get_current_user)):
         "mobile": "",
         "email": current_user.email,
         "deptName": "管理中心",
-        "roleNames": role_info.role_desc or role_info.role_name,
-        "createTime": current_user.created_at
+        "roleNames": role_info.description or role_info.name,
+        "createTime": current_user.created_at,
     })
 
 

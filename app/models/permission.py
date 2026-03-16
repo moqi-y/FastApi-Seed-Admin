@@ -15,6 +15,6 @@ class Perm(SQLModel, table=True):
     icon: str = Field(default=None, description="图标")
     sort: int = Field(default=0, description="排序")
     status: int = Field(default=1, description="状态 0=正常 1=停用")
-    desc: str = Field(default=None, description="权限描述")
+    description: str = Field(default=None, description="权限描述")
     create_time: datetime = Field(default=datetime.now(), description="创建时间")
     update_time: datetime = Field(default=datetime.now(), description="更新时间")

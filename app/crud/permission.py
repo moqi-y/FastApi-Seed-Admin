@@ -15,7 +15,7 @@ async def get_perms_list(pageNum: int, pageSize: int, keyword: str | None = None
     try:
         perms = session.query(Perm)
         if keyword:
-            perms = perms.filter(Perm.permission_name.like(f"%{keyword}%"))
+            perms = perms.filter(Perm.name.like(f"%{keyword}%"))
         perms = perms.all()
         total = len(perms)
         perms = perms[(pageNum - 1) * pageSize:pageNum * pageSize]
@@ -23,6 +23,47 @@ async def get_perms_list(pageNum: int, pageSize: int, keyword: str | None = None
             "total": total,
             "list": perms
         }
+    except Exception as e:
+        print(e)
+        return None
+    finally:
+        session.close()
+
+
+# 获取权限分配菜单
+async def get_perm_options():
+    try:
+        # 1. 查询数据库
+        perms = session.query(Perm).all()
+        # 2. 转换为字典列表
+        perms_list = []
+        for perm in perms:
+            perms_list.append({
+                "parentId": perm.parent_id,
+                "label": perm.name,
+                "value": perm.permission_id,
+                "children": []
+            })
+
+        # 3. 构建树形结构
+        # 使用字典存储所有节点的引用，key 为节点的 value (id)
+        node_map = {item['value']: item for item in perms_list}
+        tree = []
+
+        for item in perms_list:
+            parent_id = item.get('parentId')
+
+            # 如果有父节点，且父节点存在于 node_map 中
+            if parent_id and parent_id in node_map:
+                # 将当前节点添加到父节点的 children 中
+                # 注意：这里是通过引用添加，修改 node_map 会直接影响 perms_list 中的对象
+                parent_node = node_map[parent_id]
+                parent_node['children'].append(item)
+            else:
+                # 如果没有父节点（或父节点不在列表中），视为根节点
+                tree.append(item)
+        # 此时 tree 就是构建好的树，所有子节点都只在父节点的 children 里，不会在根列表重复出现
+        return tree
     except Exception as e:
         print(e)
         return None
