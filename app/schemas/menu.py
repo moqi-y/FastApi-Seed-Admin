@@ -60,6 +60,8 @@ def flat_to_tree(items: List[Dict[str, Any]],
         pid = node[pid_key]
         if pid == 0:
             tree.append(node)
+        if pid == 101:
+            tree.append(node)
         else:
             parent = mapping.get(pid)
             if parent:

@@ -55,7 +55,7 @@ create table sys_permission
     parent_id     INTEGER      not null COMMENT '父级权限ID，0为顶级',
     name          VARCHAR(50) COMMENT '权限名称',
     code          VARCHAR(100) not null COMMENT '权限编码（如：sys:user:add）',
-    type          INTEGER      not null COMMENT '类型：1-目录，2-菜单，3-按钮/接口',
+    type          INTEGER      not null COMMENT '类型：1-菜单，2-目录，3-外链，4-按钮',
     path          VARCHAR(200) COMMENT '路由路径',
     icon          VARCHAR(100) COMMENT '图标名称',
     sort          INTEGER      not null COMMENT '显示排序',
@@ -67,49 +67,43 @@ create table sys_permission
 
 create index ix_sys_permission_id
     on sys_permission (permission_id);
+create table sys_permission
+(
+    permission_id int auto_increment comment '权限ID'
+        primary key,
+    parent_id     int          not null comment '父级权限ID，0为顶级',
+    name          varchar(50)  null comment '权限名称',
+    code          varchar(100) not null comment '权限编码（如：sys:user:add）',
+    type          int          not null comment '类型：1-目录，2-菜单，3-按钮/接口',
+    path          varchar(200) null comment '路由路径',
+    icon          varchar(100) null comment '图标名称',
+    sort          int          not null comment '显示排序',
+    status        int          null comment '状态：0-禁用，1-启用',
+    description   varchar(255) null comment '权限描述',
+    create_time   datetime     null,
+    update_time   datetime     null
+);
 
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (1, 0, '系统管理', 'sys', 1, '/system', null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (2, 1, '用户管理', 'sys:user', 1, '/system/user', null, 10, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (3, 2, '查询用户', 'sys:user:query', 3, null, null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (4, 2, '新增用户', 'sys:user:add', 3, null, null, 2, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (5, 2, '编辑用户', 'sys:user:edit', 3, null, null, 3, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (6, 2, '删除用户', 'sys:user:delete', 3, null, null, 4, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (7, 2, '导出用户', 'sys:user:export', 3, null, null, 5, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (8, 2, '导入用户', 'sys:user:import', 3, null, null, 6, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (9, 2, '重置密码', 'sys:user:reset-password', 3, null, null, 7, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (10, 1, '角色管理', 'sys:role', 1, '/system/role', null, 20, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (11, 3, '查询角色', 'sys:role:query', 3, null, null, 1, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (12, 3, '新增角色', 'sys:role:add', 3, null, null, 2, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (13, 3, '编辑角色', 'sys:role:edit', 3, null, null, 3, null, null, null, null);
-INSERT INTO sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description,
-                            create_time, update_time)
-VALUES (14, 3, '删除角色', 'sys:role:delete', 3, null, null, 4, null, null, null, null);
+create index ix_sys_permission_id
+    on sys_permission (permission_id);
+
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (1, 0, '系统管理', 'sys', 2, '/system', null, 1, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (2, 1, '用户管理', 'sys:user', 1, '/system/user', null, 10, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (3, 2, '查询用户', 'sys:user:query', 4, null, null, 1, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (4, 2, '新增用户', 'sys:user:add', 4, null, null, 2, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (5, 2, '编辑用户', 'sys:user:edit', 4, null, null, 3, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (6, 2, '删除用户', 'sys:user:delete', 4, null, null, 4, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (7, 2, '导出用户', 'sys:user:export', 4, null, null, 5, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (8, 2, '导入用户', 'sys:user:import', 4, null, null, 6, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (9, 2, '重置密码', 'sys:user:reset-password', 4, null, null, 7, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (10, 1, '角色管理', 'sys:role', 1, '/system/role', null, 20, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (11, 10, '查询角色', 'sys:role:query', 4, null, null, 1, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (12, 10, '新增角色', 'sys:role:add', 4, null, null, 2, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (13, 10, '编辑角色', 'sys:role:edit', 4, null, null, 3, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (14, 10, '删除角色', 'sys:role:delete', 4, null, null, 4, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (15, 200, '菜单管理', 'sys:menu', 2, null, null, 5, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (16, 15, '编辑菜单', 'sys:menu:edit', 4, null, null, 1, null, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_permission (permission_id, parent_id, name, code, type, path, icon, sort, status, description, create_time, update_time) VALUES (17, 15, '删除菜单', 'sys:menu:delete', 4, null, null, 2, null, null, null, null);
 
 # 角色权限表
 create table sys_role_permission
@@ -195,45 +189,40 @@ create table sys_menu
     is_deleted  INTEGER
 );
 
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (1, 0, '/system', '/system', 'Layout', '/system/user', 'system', '系统管理', 0, 0, 0, null, 1, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (2, 1, 'User', '/user', 'system/user/index', null, 'el-icon-User', '用户管理', 0, 1, 0, null, 1, null, null,
-        null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (3, 1, 'Role', '/role', 'system/role/index', null, 'role', '角色管理', 0, 1, 0, null, 2, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (4, 1, 'SysMenu', '/menu', 'system/menu/index', null, 'menu', '菜单管理', 0, 1, 0, null, 3, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (5, 1, 'Dept', '/dept', 'system/dept/index', null, 'tree', '部门管理', 0, 1, 0, null, 4, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (6, 1, 'Dict', '/dict', 'system/dict/index', null, 'dict', '字典管理', 0, 1, 0, null, 5, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (7, 1, 'Log', '/log', 'system/log/index', null, 'document', '系统日志', 0, 1, 0, null, 6, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (8, 1, 'Config', '/config', 'system/config/index', null, 'setting', '系统配置', 0, 1, 0, null, 7, null, null,
-        null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (9, 1, 'Notice', '/notice', 'system/notice/index', null, '', '通知公告', 0, 1, 0, null, 8, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (10, 0, '/codegen', '/codegen', 'Layout', null, 'menu', '系统工具', 0, 0, 0, null, 2, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (11, 10, 'Codegen', '/codegen', 'codegen/index', null, 'code', '代码生成', 0, 1, 0, null, 1, null, null, null);
-INSERT INTO sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show,
-                      params, sort, created_at, updated_at, is_deleted)
-VALUES (12, 1, 'DictData', '/system/dict-item', 'system/dict/dict-item', null, 'dict', '字典数据', 1, 0, 0, null, 1,
-        null, null, null);
+create table sys_menu
+(
+    id          int auto_increment comment '菜单ID'
+        primary key,
+    parent_id   int          null,
+    name        varchar(50)  not null comment '菜单名称（路由名）',
+    path        varchar(200) null comment '路由路径',
+    component   varchar(200) null comment '组件路径',
+    redirect    varchar(200) null comment '重定向地址',
+    icon        varchar(100) null comment '图标类名',
+    title       varchar(50)  null comment '显示标题',
+    hidden      int          not null,
+    keep_alive  int          not null,
+    always_show int          not null,
+    params      varchar(500) null comment '路由参数（JSON格式）',
+    sort        int          not null,
+    created_at  datetime     null,
+    updated_at  datetime     null,
+    is_deleted  int          null
+);
+
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (1, 0, '系统管理', '/system', 'Layout', '/system/user', 'system', '系统管理', 0, 0, 0, null, 2, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (2, 1, '用户管理', '/user', 'system/user/index', null, 'el-icon-User', '用户管理', 0, 1, 0, null, 1, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (3, 1, '角色管理', '/role', 'system/role/index', null, 'role', '角色管理', 0, 1, 0, null, 2, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (4, 1, '菜单管理', '/menu', 'system/menu/index', null, 'menu', '菜单管理', 0, 1, 0, null, 3, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (5, 1, '部门管理', '/dept', 'system/dept/index', null, 'tree', '部门管理', 1, 1, 0, null, 4, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (6, 1, '字典管理', '/dict', 'system/dict/index', null, 'dict', '字典管理', 0, 1, 0, null, 5, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (7, 1, '系统日志', '/log', 'system/log/index', null, 'document', '系统日志', 0, 1, 0, null, 6, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (8, 1, '系统配置', '/config', 'system/config/index', null, 'setting', '系统配置', 0, 1, 0, null, 7, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (9, 1, '通知公告', '/notice', 'system/notice/index', null, '', '通知公告', 1, 1, 0, null, 8, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (10, 101, '系统工具', '/tool', 'Layout', null, 'menu', '系统工具', 0, 0, 0, null, 3, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (11, 10, '代码生成', '/codegen', 'codegen/index', null, 'code', '代码生成', 0, 1, 0, null, 1, null, null, null);
+INSERT INTO `FastApi-Seed-Admin`.sys_menu (id, parent_id, name, path, component, redirect, icon, title, hidden, keep_alive, always_show, params, sort, created_at, updated_at, is_deleted) VALUES (12, 1, '字典数据', '/system/dict-item', 'system/dict/dict-item', null, 'dict', '字典数据', 1, 0, 0, null, 1, null, null, null);
+
 
 # 字典类型表
 create table sys_dict

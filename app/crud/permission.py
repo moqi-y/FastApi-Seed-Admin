@@ -42,9 +42,13 @@ async def get_perm_options():
                 "parentId": perm.parent_id,
                 "label": perm.name,
                 "value": perm.permission_id,
+                "id": perm.permission_id,
+                "path": perm.path,
+                "type": perm.type,
+                "icon": perm.icon if perm.icon is not None else "",
+                "name": perm.name,
                 "children": []
             })
-
         # 3. 构建树形结构
         # 使用字典存储所有节点的引用，key 为节点的 value (id)
         node_map = {item['value']: item for item in perms_list}
@@ -61,6 +65,7 @@ async def get_perm_options():
                 parent_node['children'].append(item)
             else:
                 # 如果没有父节点（或父节点不在列表中），视为根节点
+
                 tree.append(item)
         # 此时 tree 就是构建好的树，所有子节点都只在父节点的 children 里，不会在根列表重复出现
         return tree
