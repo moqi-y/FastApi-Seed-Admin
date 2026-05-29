@@ -13,6 +13,7 @@ class Menu(SQLModel, table=True):
     redirect: str = Field(nullable=True, description="重定向地址")
     icon: str = Field(nullable=True, description="菜单图标")
     title: str = Field(nullable=True, description="菜单标题")
+    routeName: str = Field(nullable=True, description="路由名称", sa_column_kwargs={"name": "route_name"})
     hidden: int = Field(default=0, description="是否隐藏（0显示，1隐藏）")
     keep_alive: int = Field(default=1, description="是否缓存（0不缓存，1缓存）")
     always_show: int = Field(default=0, description="是否总是显示（0不显示，1显示）")

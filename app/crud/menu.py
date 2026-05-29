@@ -36,6 +36,11 @@ async def get_menu_by_id(id):
         session.close()
 
 
+# 新增菜单
+async def add_menu(menu):
+    pass
+
+
 # 更新菜单路由列表
 async def update_menu(id, name, path, component, parent_id, hidden, sort, icon, create_time, update_time):
     try:
