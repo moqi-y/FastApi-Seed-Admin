@@ -2,9 +2,10 @@ from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
 import os
+from app.core.config import get_settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+SECRET_KEY = get_settings().jwt_secret_key
 # 设置JWT的算法
 ALGORITHM = "HS256"
 # 设置访问令牌的默认缺省过期时间为30分钟

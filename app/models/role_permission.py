@@ -9,5 +9,5 @@ class RolePermission(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True, description="角色权限ID")
     role_id: int = Field(foreign_key="sys_role.role_id", index=True, description="角色ID")
     permission_id: int = Field(foreign_key="sys_permission.permission_id", description="权限ID")
-    created_at: datetime = Field(default=datetime.now())
-    updated_at: datetime = Field(default=datetime.now())
+    created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)

@@ -1,57 +1,50 @@
-import os
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, applications
+from fastapi import FastAPI, HTTPException, applications
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.staticfiles import StaticFiles
-from dotenv import load_dotenv
+
+from app.core.config import ROOT_DIR, get_settings
+from app.core.exceptions import http_exception_handler, validation_exception_handler
 from app.crud.database import create_db_and_tables
 from app.middleware import cors
 from app.middleware.logger_config import make_logging_middleware
 from app.routers import router_config
 
-# 加载 .env 文件
-load_dotenv()
+settings = get_settings()
 
 
-# 在线API接口文档
 def swagger_monkey_patch(*args, **kwargs):
     return get_swagger_ui_html(
-        *args, **kwargs,
-        # swagger_js_url="https://cdn.bootcdn.net/ajax/libs/swagger-ui/5.20.0/swagger-ui-bundle.min.js",
-        # swagger_css_url="https://cdn.bootcdn.net/ajax/libs/swagger-ui/5.20.0/swagger-ui.min.css",
+        *args,
+        **kwargs,
         swagger_js_url="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.20.0/swagger-ui-bundle.js",
         swagger_css_url="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.20.0/swagger-ui.min.css",
     )
 
 
 applications.get_swagger_ui_html = swagger_monkey_patch
-debug = os.getenv("APP_DEBUG", "").lower() in ("1", "true")
-app = FastAPI(
-    title=os.getenv("APP_NAME"),
-    description=os.getenv("APP_NAME") + " swagger接口文档",
-    version=os.getenv("APP_VERSION"),
-    docs_url="/docs" if debug else None,  # docs_url=None, redoc_url=None
-    redoc_url="/redoc" if debug else None,
-)
 
 
-@app.on_event("startup")
-def on_startup():
-    # 创建数据库和表
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     create_db_and_tables()
+    yield
 
 
-#  跨域设置
+app = FastAPI(
+    title=settings.app_name,
+    description=settings.app_description,
+    version=settings.app_version,
+    docs_url="/docs" if settings.debug else None,
+    redoc_url="/redoc" if settings.debug else None,
+    lifespan=lifespan,
+)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+
 cors.cors_config(app)
-
-# 路由配置
 router_config(app)
-
-# 注册日志中间件
 app.middleware("http")(make_logging_middleware())
-
-#  静态文件配置
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-
+app.mount("/static", StaticFiles(directory=str(ROOT_DIR / "static")), name="static")

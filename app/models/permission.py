@@ -16,5 +16,5 @@ class Perm(SQLModel, table=True):
     sort: int = Field(default=0, description="排序")
     status: int = Field(default=1, description="状态 0=正常 1=停用")
     description: str = Field(default=None, description="权限描述")
-    create_time: datetime = Field(default=datetime.now(), description="创建时间")
-    update_time: datetime = Field(default=datetime.now(), description="更新时间")
+    create_time: datetime = Field(default_factory=datetime.now, description="创建时间")
+    update_time: datetime = Field(default_factory=datetime.now, description="更新时间")

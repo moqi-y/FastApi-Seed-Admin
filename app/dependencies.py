@@ -1,10 +1,10 @@
-import os
 from datetime import timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from app.core.security import SECRET_KEY, ALGORITHM, create_access_token
 from app.crud.user import get_user_by_username
+from app.core.config import get_settings
 
 # 定义一个OAuth2PasswordBearer对象，用于处理OAuth2.0密码模式的认证,用于在线文档的认证
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login/swagger")
@@ -34,7 +34,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 def create_token_response(username: str):
     # 设置access_token的过期时间,从环境变量中获取
-    access_token_expires = timedelta(minutes=float(os.getenv("JWT_EXPIRE_MINUTES")))
+    access_token_expires = timedelta(minutes=get_settings().jwt_expire_minutes)
     # 创建access_token，并设置过期时间为access_token_expires
     access_token = create_access_token(
         data={"sub": username}, expires_delta=access_token_expires

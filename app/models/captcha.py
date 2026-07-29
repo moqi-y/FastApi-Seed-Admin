@@ -10,5 +10,5 @@ class Captcha(SQLModel, table=True):
     captcha_key: str = Field(index=True)
     captcha_base64: str = Field()
     captcha_value: str = Field()
-    expire_time: datetime = Field(default=datetime.now() + timedelta(minutes=5))  # 验证码过期时间, 默认5分钟
-    create_time: datetime = Field(default=datetime.now())
+    expire_time: datetime = Field(default_factory=lambda: datetime.now() + timedelta(minutes=5))
+    create_time: datetime = Field(default_factory=datetime.now)

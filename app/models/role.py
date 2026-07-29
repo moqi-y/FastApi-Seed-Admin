@@ -12,7 +12,7 @@ class Role(SQLModel, table=True):
     code: str = Field(default=None, description="角色编码")
     status: int = Field(default=1, description="角色状态")
     description: str = Field(default=None, description="角色描述")
-    createTime: datetime = Field(default=datetime.now(), description="创建时间",
+    createTime: datetime = Field(default_factory=datetime.now, description="创建时间",
                                  sa_column_kwargs={"name": "create_time"})
-    updateTime: datetime = Field(default=datetime.now(), description="更新时间",
+    updateTime: datetime = Field(default_factory=datetime.now, description="更新时间",
                                  sa_column_kwargs={"name": "update_time"})

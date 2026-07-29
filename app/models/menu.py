@@ -19,6 +19,6 @@ class Menu(SQLModel, table=True):
     always_show: int = Field(default=0, description="是否总是显示（0不显示，1显示）")
     params: str = Field(nullable=True, description="路由参数")
     sort: int = Field(default=0, description="排序")
-    created_at: datetime = Field(nullable=True, default=datetime.now())
-    updated_at: datetime = Field(nullable=True, default=datetime.now())
+    created_at: datetime = Field(nullable=True, default_factory=datetime.now)
+    updated_at: datetime = Field(nullable=True, default_factory=datetime.now)
     is_deleted: int = Field(default=0, nullable=True, description="是否删除（0未删除，1已删除）")

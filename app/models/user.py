@@ -20,7 +20,7 @@ class User(SQLModel, table=True):
     # 邮箱，设置索引
     email: str | None = None
     # 创建时间，默认为当前时间25, email='jane.doe@example.com', active=False)
-    created_at: datetime = Field(default=datetime.now())
+    created_at: datetime = Field(default_factory=datetime.now)
     status: int = Field(default=1)
 
 
@@ -31,5 +31,5 @@ class Email(SQLModel, table=True):
     email: str = Field(index=True, description="用户邮箱")
     code: str = Field(description="验证码")
     user_id: int = Field(foreign_key="sys_user.user_id", index=True, description="用户ID")
-    expire_time: datetime = Field(default=datetime.now() + timedelta(minutes=10), description="过期时间")
-    create_time: datetime = Field(default=datetime.now(), description="创建时间")
+    expire_time: datetime = Field(default_factory=lambda: datetime.now() + timedelta(minutes=10), description="过期时间")
+    create_time: datetime = Field(default_factory=datetime.now, description="创建时间")

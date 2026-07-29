@@ -1,12 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import get_settings
 
 
 # 定义一个函数，用于配置跨域资源共享（CORS）
 def cors_config(app):
     # 定义允许的源
-    origins = [
-        "*"
-    ]
+    origins = get_settings().cors_origins
     # 添加中间件，用于处理跨域请求
     app.add_middleware(
         CORSMiddleware,
