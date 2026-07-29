@@ -6,75 +6,71 @@ from app.crud.database import engine
 from app.models.menu import Menu
 from app.schemas.menu import flat_to_tree
 
-session = Session(engine)
 
-
-# 获取菜单路由列表
 async def get_menu():
-    try:
-        menus = session.exec(select(Menu)).all()
-        # 转换为list
-        menus = [menu.dict() for menu in menus]
-        tree = flat_to_tree(menus)
-        return tree
-    except Exception as e:
-        print(e)
-        return []
-    finally:
-        session.close()
+    with Session(engine) as session:
+        menus = session.exec(
+            select(Menu).where(Menu.is_deleted == 0).order_by(Menu.sort, Menu.id)
+        ).all()
+        return flat_to_tree([menu.model_dump() for menu in menus])
 
 
-# 获取菜单路由列表
-async def get_menu_by_id(id):
-    try:
-        menu = session.exec(select(Menu).where(Menu.id == id)).one()
-        return menu
-    except Exception as e:
-        print(e)
-        return None
-    finally:
-        session.close()
+async def get_menu_by_id(menu_id: int):
+    with Session(engine) as session:
+        return session.get(Menu, menu_id)
 
 
-# 新增菜单
-async def add_menu(menu):
-    pass
-
-
-# 更新菜单路由列表
-async def update_menu(id, name, path, component, parent_id, hidden, sort, icon, create_time, update_time):
-    try:
-        menu = session.exec(select(Menu).where(Menu.id == id)).one()
-        menu.name = name
-        menu.path = path
-        menu.component = component
-        menu.parent_id = parent_id
-        menu.hidden = hidden
-        menu.sort = sort
-        menu.icon = icon
-        menu.create_time = create_time
-        menu.update_time = update_time
+async def add_menu(data: dict):
+    with Session(engine) as session:
+        menu = Menu(
+            parent_id=int(data.get("parentId") or 0),
+            name=data["name"],
+            title=data.get("title") or data["name"],
+            path=data.get("routePath"),
+            component=data.get("component"),
+            redirect=data.get("redirect"),
+            icon=data.get("icon"),
+            routeName=data.get("routeName") or data["name"],
+            hidden=0 if data.get("visible", 1) else 1,
+            keep_alive=data.get("keepAlive", 1),
+            always_show=data.get("alwaysShow", 0),
+            params=data.get("params"),
+            sort=data.get("sort", 0),
+        )
         session.add(menu)
         session.commit()
         session.refresh(menu)
         return menu
-    except Exception as e:
-        print(e)
-        return None
-    finally:
-        session.close()
 
 
-# 删除菜单路由列表
-async def delete_menu(id):
-    try:
-        menu = session.exec(select(Menu).where(Menu.id == id)).one()
-        menu.is_deleted = 1
+async def update_menu(menu_id: int, data: dict):
+    with Session(engine) as session:
+        menu = session.get(Menu, menu_id)
+        if not menu:
+            return None
+        mapping = {
+            "parentId": "parent_id", "routePath": "path", "routeName": "routeName",
+            "keepAlive": "keep_alive", "alwaysShow": "always_show", "visible": "hidden",
+        }
+        for key, value in data.items():
+            field = mapping.get(key, key)
+            if hasattr(menu, field):
+                value = 0 if key == "visible" and value else (1 if key == "visible" else value)
+                setattr(menu, field, value)
+        menu.updated_at = datetime.now()
+        session.add(menu)
         session.commit()
         session.refresh(menu)
         return menu
-    except Exception as e:
-        print(e)
-        return None
-    finally:
-        session.close()
+
+
+async def delete_menu(menu_id: int):
+    with Session(engine) as session:
+        menu = session.get(Menu, menu_id)
+        if not menu:
+            return None
+        menu.is_deleted = 1
+        menu.updated_at = datetime.now()
+        session.add(menu)
+        session.commit()
+        return menu

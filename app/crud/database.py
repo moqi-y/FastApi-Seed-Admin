@@ -37,6 +37,7 @@ def create_db_and_tables() -> None:
 def seed_initial_data() -> None:
     from app.core.security import hash_password
     from app.models.permission import Perm
+    from app.models.menu import Menu
     from app.models.role import Role
     from app.models.role_permission import RolePermission
     from app.models.user import User
@@ -111,6 +112,33 @@ def seed_initial_data() -> None:
                 if permission_id not in existing_ids
             ]
         )
+
+        menus = [
+            ("System", "系统管理", "/system", "Layout", None, "system", 0, 1),
+            ("User", "用户管理", "user", "system/user/index", "System", "user", 10, 1),
+            ("Role", "角色管理", "role", "system/role/index", "System", "role", 20, 1),
+            ("Menu", "菜单管理", "menu", "system/menu/index", "System", "menu", 30, 1),
+            ("Dict", "字典管理", "dict", "system/dict/index", "System", "dict", 40, 1),
+        ]
+        menu_ids = {}
+        for route_name, title, path, component, parent_route, icon, sort, always_show in menus:
+            menu = session.query(Menu).filter(Menu.routeName == route_name).first()
+            if not menu:
+                menu = Menu(
+                    name=route_name,
+                    title=title,
+                    path=path,
+                    component=component,
+                    routeName=route_name,
+                    icon=icon,
+                    sort=sort,
+                    always_show=always_show,
+                )
+                if parent_route:
+                    menu.parent_id = menu_ids[parent_route]
+                session.add(menu)
+                session.flush()
+            menu_ids[route_name] = menu.id
         session.commit()
 
 
