@@ -1,44 +1,39 @@
 from fastapi import APIRouter, HTTPException
 
+from app.crud.permission import add_perm, delete_perm, get_perms_list, update_perm
 from app.schemas.perm import PermCreate, PermUpdate
-from app.schemas.response import *
-
-from app.crud.permission import get_perms_list, add_perm, update_perm, delete_perm
+from app.schemas.response import PageData, PaginationResponse, SuccessResponse
 
 router = APIRouter()
 
 
-# 查看权限
-@router.get("/permissions", summary="查看权限")
-async def root(pageNum: int = 1, pageSize: int = 10, keyword: str | None = None):
-    perms = await get_perms_list(pageNum, pageSize, keyword)
-    if perms:
-        return PaginationResponse(total=perms["total"], list=perms["list"])
-    raise HTTPException(status_code=404, detail="权限不存在")
+@router.get("/permissions", response_model=PaginationResponse, summary="查询权限")
+async def list_permissions(pageNum: int = 1, pageSize: int = 10, keyword: str | None = None):
+    if pageNum < 1 or not 1 <= pageSize <= 100:
+        raise HTTPException(status_code=422, detail="分页参数无效")
+    result = await get_perms_list(pageNum, pageSize, keyword)
+    return PaginationResponse(data=PageData(**result))
 
 
-# 添加权限
-@router.post("/permissions", summary="添加权限")
-async def root(perms: PermCreate):
-    result = await add_perm(perms)
-    if result:
-        return SuccessResponse()
-    raise HTTPException(status_code=400, detail="添加失败")
+@router.post("/permissions", response_model=SuccessResponse, summary="新增权限")
+async def create_permission(data: PermCreate):
+    result = await add_perm(data)
+    if not result:
+        raise HTTPException(status_code=409, detail="权限编码已存在")
+    return SuccessResponse(data=result)
 
 
-# 修改权限
-@router.put("/permissions", summary="修改权限")
-async def root(perms: PermUpdate):
-    result = await update_perm(perms)
-    if result:
-        return SuccessResponse(data=result)
-    raise HTTPException(status_code=400, detail="修改失败")
+@router.put("/permissions", response_model=SuccessResponse, summary="修改权限")
+async def update_permission(data: PermUpdate):
+    result = await update_perm(data)
+    if not result:
+        raise HTTPException(status_code=404, detail="权限不存在或编码重复")
+    return SuccessResponse(data=result)
 
 
-# 删除权限
-@router.delete("/permissions", summary="删除权限")
-async def root(permission_id: int):
+@router.delete("/permissions/{permission_id}", response_model=SuccessResponse, summary="删除权限")
+async def remove_permission(permission_id: int):
     result = await delete_perm(permission_id)
-    if result:
-        return SuccessResponse(data=result, message="删除成功")
-    raise HTTPException(status_code=400, detail="删除失败")
+    if not result:
+        raise HTTPException(status_code=409, detail="权限不存在或仍有子权限")
+    return SuccessResponse(data=result)

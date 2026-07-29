@@ -5,6 +5,7 @@ from jose import JWTError, jwt
 from app.core.security import SECRET_KEY, ALGORITHM, create_access_token
 from app.crud.user import get_user_by_username
 from app.core.config import get_settings
+from app.crud.role import get_user_roles_codes
 
 # 定义一个OAuth2PasswordBearer对象，用于处理OAuth2.0密码模式的认证,用于在线文档的认证
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login/swagger")
@@ -30,6 +31,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
     # 返回用户
     return user
+
+
+async def require_admin(current_user=Depends(get_current_user)):
+    """Limit role and permission administration to the built-in admin role."""
+    roles = await get_user_roles_codes(current_user.id)
+    if "admin" not in roles:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="需要管理员权限")
+    return current_user
 
 
 def create_token_response(username: str):

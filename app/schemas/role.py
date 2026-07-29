@@ -8,7 +8,7 @@ class Role(BaseModel):
     name: str
     code: str
     status: int | None = None
-    description: str
+    description: str | None = None
     create_time: datetime
     update_time: datetime
 
@@ -17,11 +17,11 @@ class RoleCreate(BaseModel):
     name: str
     code: str
     status: int | None = None
-    description: str
+    description: str | None = None
 
 
 class RoleUpdate(BaseModel):
     name: str
     code: str
     status: int | None = None
-    description: str
+    description: str | None = None

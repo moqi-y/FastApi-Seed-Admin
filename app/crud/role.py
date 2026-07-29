@@ -1,159 +1,107 @@
 from datetime import datetime
 
-from sqlalchemy import delete
+from sqlalchemy import func
 from sqlmodel import Session, select
+
 from app.crud.database import engine
 from app.models.role import Role
 from app.models.user_role import UserRole
 from app.schemas.role import RoleCreate, RoleUpdate
 
-session = Session(engine)
 
-
-async def get_roles_list(pageNum, pageSize, keywords):
-    """获取角色列表"""
-    try:
-        roles = session.query(Role)
+async def get_roles_list(page_num: int, page_size: int, keywords: str | None = None):
+    with Session(engine) as session:
+        statement = select(Role)
+        count_statement = select(func.count()).select_from(Role)
         if keywords:
-            roles = roles.where(Role.name.like(f'%{keywords}%'))
-        roles = roles.all()
-        total = len(roles)
-        roles = roles[(pageNum - 1) * pageSize:pageNum * pageSize]
-        return {
-            "total": total,
-            "list": roles
-        }
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+            condition = Role.name.contains(keywords)
+            statement = statement.where(condition)
+            count_statement = count_statement.where(condition)
+        total = session.exec(count_statement).one()
+        roles = session.exec(
+            statement.order_by(Role.roleId).offset((page_num - 1) * page_size).limit(page_size)
+        ).all()
+        return {"total": total, "list": roles}
 
 
-# 通过角色名获取角色信息
-async def get_role_by_name(name):
-    try:
-        role = session.query(Role).filter(Role.name == name).first()
-        return role
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+async def get_role_by_name(name: str):
+    with Session(engine) as session:
+        return session.exec(select(Role).where(Role.name == name)).first()
 
-
-# 角色下拉列表
 
 async def get_roles_options():
-    try:
-        roles = session.query(Role).all()
-        return roles
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+    with Session(engine) as session:
+        return session.exec(select(Role).where(Role.status == 1).order_by(Role.roleId)).all()
 
 
-# 查询用户的所有角色编码
 async def get_user_roles_codes(user_id: int):
-    """获取用户角色编码"""
-    try:
-        stmt = (
-            select(Role.code)  # 只选 role_code
-            .join(UserRole, Role.roleId == UserRole.role_id)  # 联表：角色 和 用户角色
-            .where(UserRole.user_id == user_id)  # 条件：用户ID
+    with Session(engine) as session:
+        statement = (
+            select(Role.code)
+            .join(UserRole, Role.roleId == UserRole.role_id)
+            .where(UserRole.user_id == user_id, Role.status == 1)
         )
-        result = session.exec(stmt)  # 执行 SQL
-        return result.all()
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+        return session.exec(statement).all()
 
 
-# 根据role_id获取角色信息
-async def get_role_by_id(role_id):
-    try:
-        query = select(Role).where(Role.roleId == role_id)
-        role = session.exec(query).first()
-        return role
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+async def get_role_by_id(role_id: int):
+    with Session(engine) as session:
+        return session.get(Role, role_id)
 
 
-# 根据role_code获取角色信息
-async def get_role_by_code(role_code):
-    try:
-        query = select(Role).where(Role.code == role_code)
-        role = session.exec(query).first()
-        return role
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
+async def get_role_by_code(role_code: str):
+    with Session(engine) as session:
+        return session.exec(select(Role).where(Role.code == role_code)).first()
 
 
-async def add_role(roles: RoleCreate):
-    """添加角色"""
-    try:
-        # 判断角色名是否已存在
-        query = select(Role).where(Role.name == roles.name)
-        role = session.exec(query).first()
-        if role:
+async def add_role(data: RoleCreate):
+    with Session(engine) as session:
+        exists = session.exec(
+            select(Role).where((Role.name == data.name) | (Role.code == data.code))
+        ).first()
+        if exists:
             return None
         role = Role(
-            name=roles.name,
-            code=roles.name,
-            status=roles.status,
-            desc=roles.description
+            name=data.name,
+            code=data.code,
+            status=data.status if data.status is not None else 1,
+            description=data.description,
         )
         session.add(role)
         session.commit()
         session.refresh(role)
         return role
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
 
 
-async def update_role(new_role: RoleUpdate, role_id):
-    """更新角色"""
-    try:
-        query = select(Role).where(Role.roleId == role_id)
-        role = session.exec(query).first()
+async def update_role(data: RoleUpdate, role_id: int):
+    with Session(engine) as session:
+        role = session.get(Role, role_id)
         if not role:
             return None
-        role.name = new_role.name if new_role.name else role.name
-        role.description = new_role.description if new_role.description else role.description
+        duplicate = session.exec(
+            select(Role).where(Role.code == data.code, Role.roleId != role_id)
+        ).first()
+        if duplicate:
+            return None
+        role.name = data.name
+        role.code = data.code
+        role.status = data.status if data.status is not None else role.status
+        role.description = data.description
         role.updateTime = datetime.now()
+        session.add(role)
         session.commit()
         session.refresh(role)
         return role
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()
 
 
-async def delete_roles(role_ids: list):
-    """删除角色"""
-    try:
-        for role_id in role_ids:
-            stmt = delete(Role).where(Role.roleId == role_id)
-            session.exec(stmt)
+async def delete_roles(role_ids: list[int]):
+    with Session(engine) as session:
+        protected = session.exec(
+            select(Role).where(Role.roleId.in_(role_ids), Role.code == "admin")
+        ).first()
+        if protected:
+            return False
+        for role in session.exec(select(Role).where(Role.roleId.in_(role_ids))).all():
+            session.delete(role)
         session.commit()
         return True
-    except Exception as e:
-        print("SQL_Error:", e)
-        return None
-    finally:
-        session.close()

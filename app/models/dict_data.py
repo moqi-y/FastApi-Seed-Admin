@@ -11,4 +11,4 @@ class DictData(SQLModel, table=True):
     label: str = Field(default=None)
     sort: int = Field(default=0)
     status: int = Field(default=0, description="0：禁用，1：启用")
-    tagType: str = Field(default=None)
+    tagType: str = Field(default=None, sa_column_kwargs={"name": "tag_type"})

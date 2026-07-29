@@ -43,6 +43,7 @@ class Settings:
 
     jwt_secret_key = os.getenv("JWT_SECRET_KEY", "change-me-in-production")
     jwt_expire_minutes = int(os.getenv("JWT_EXPIRE_MINUTES", "30"))
+    use_captcha = _as_bool(os.getenv("USE_CAPTCHA"))
     cors_origins = _as_list(
         os.getenv("CORS_ORIGINS"), ["http://localhost:3000", "http://127.0.0.1:3000"]
     )

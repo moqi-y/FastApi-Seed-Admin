@@ -1,7 +1,7 @@
 from fastapi import Depends
 
 from app.core.config import get_settings
-from app.dependencies import get_current_user
+from app.dependencies import get_current_user, require_admin
 from app.routers import (
     auth,
     dicts,
@@ -32,11 +32,26 @@ def router_config(app):
         roles.router,
         prefix=f"{prefix}/roles",
         tags=["roles"],
-        dependencies=[Depends(get_current_user)],
+        dependencies=[Depends(require_admin)],
     )
-    app.include_router(permissions.router, prefix=f"{prefix}/perm", tags=["permissions"])
-    app.include_router(user_role.router, prefix=f"{prefix}/user_roles", tags=["user_roles"])
-    app.include_router(role_perms.router, prefix=f"{prefix}/role_perms", tags=["role_perms"])
+    app.include_router(
+        permissions.router,
+        prefix=f"{prefix}/perm",
+        tags=["permissions"],
+        dependencies=[Depends(require_admin)],
+    )
+    app.include_router(
+        user_role.router,
+        prefix=f"{prefix}/user_roles",
+        tags=["user_roles"],
+        dependencies=[Depends(require_admin)],
+    )
+    app.include_router(
+        role_perms.router,
+        prefix=f"{prefix}/role_perms",
+        tags=["role_perms"],
+        dependencies=[Depends(require_admin)],
+    )
     app.include_router(
         menu.router,
         prefix=f"{prefix}/menus",

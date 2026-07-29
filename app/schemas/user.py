@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import List, Any
+from pydantic import Field
 
 from pydantic import BaseModel
 
@@ -14,10 +15,10 @@ class UserCreate(BaseModel):
     nickname: str
     gender: int
     avatar: str | None = None
-    phone: str | None = None
+    mobile: str | None = None
     password: str | None = None
     email: str | None = None
-    roleIds: List[Any] = []
+    roleIds: List[Any] = Field(default_factory=list)
 
 
 class UserOut(BaseModel):
@@ -49,7 +50,7 @@ class UserUpdate(BaseModel):
     gender: int | None = None
     mobile: str | None = None
     email: str | None = None
-    roleIds: List[Any] = []
+    roleIds: List[Any] | None = None
 
 
 class PasswordUpdate(BaseModel):

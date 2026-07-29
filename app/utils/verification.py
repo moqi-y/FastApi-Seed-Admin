@@ -18,15 +18,15 @@ def check_email(email: str):
     return True
 
 
-def check_phone(phone: str):
+def check_mobile(mobile: str):
     """
     验证手机号
-    :param phone: 手机号
+    :param mobile: 手机号
     :return: bool
     """
-    if not phone:
+    if not mobile:
         return False
-    if not re.match(r"^1[3-9]\d{9}$", phone):
+    if not re.match(r"^1[3-9]\d{9}$", mobile):
         return False
     return True
 

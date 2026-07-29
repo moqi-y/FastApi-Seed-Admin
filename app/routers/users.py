@@ -1,211 +1,175 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends, Body, BackgroundTasks, Query
+
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query
+
 from app.crud.permission import get_user_perm_codes
-from app.crud.role import get_user_roles_codes, get_role_by_code
-from app.crud.user import get_user_by_username, update_user_info, get_user_by_id, update_user_password, PasswordStatus, \
-    send_email_code, SendStatus, get_code_by_email, get_users_page, delete_users, create_user, reset_password
-from app.crud.user_role import get_role_name_by_user_id
-from app.dependencies import get_current_user
+from app.crud.role import get_role_by_code, get_user_roles_codes
+from app.crud.user import (
+    PasswordStatus,
+    SendStatus,
+    create_user,
+    delete_users,
+    get_code_by_email,
+    get_user_by_id,
+    get_user_by_username,
+    get_users_page,
+    reset_password,
+    send_email_code,
+    update_user_info,
+    update_user_password,
+)
+from app.crud.user_role import get_user_role_ids
+from app.dependencies import get_current_user, require_admin
 from app.middleware.background_tasks import clean_email_code
-from app.schemas.response import SuccessResponse, PaginationResponse, PageData
-from app.schemas.user import UserIn, UserUpdate, PasswordUpdate, EmailUpdate, QueryUserPage, UserCreate
+from app.schemas.response import PageData, PaginationResponse, SuccessResponse
+from app.schemas.user import EmailUpdate, PasswordUpdate, QueryUserPage, UserCreate, UserUpdate
 from app.utils.str_to_list import str_to_int_list
 from app.utils.verification import check_email
 
 router = APIRouter()
 
 
-# 获取用户信息
-@router.get("/me", summary="获取当前用户信息", dependencies=[Depends(get_current_user)])
+@router.get("/me", response_model=SuccessResponse, summary="当前登录用户")
 async def get_me(current_user=Depends(get_current_user)):
-    roles = await get_user_roles_codes(current_user.id)
-    perms = await get_user_perm_codes(current_user.id)
-    user = {
-        "userId": current_user.id,
-        "username": current_user.username,
-        "nickname": current_user.nickname,
-        "avatar": current_user.avatar,
-        "email": current_user.email,
-        "created_at": current_user.created_at,
-        "roles": roles,  # 用户角色,例如：["admin", "user"]
-        "perms": perms  # 用户权限,例如：["user:add", "user:delete"]
-    }
-    return SuccessResponse(code="00000", data=user)
+    return SuccessResponse(
+        data={
+            "userId": current_user.id,
+            "username": current_user.username,
+            "nickname": current_user.nickname,
+            "avatar": current_user.avatar,
+            "email": current_user.email,
+            "roles": await get_user_roles_codes(current_user.id),
+            "perms": await get_user_perm_codes(current_user.id),
+        }
+    )
 
 
-# 通过用户名查询用户信息
-@router.get("/userinfo/{username}", response_model=SuccessResponse, summary="通过用户名查询用户信息",
-            dependencies=[Depends(get_current_user)])
-async def get_user(username: str):
-    user = get_user_by_username(username)
-    if not user:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return SuccessResponse(data={
-        "user_id": user.user_id,
-        "username": user.username,
-        "email": user.email
-    })
+@router.get("/profile", response_model=SuccessResponse, summary="个人资料")
+async def get_profile(current_user=Depends(get_current_user)):
+    role_codes = await get_user_roles_codes(current_user.id)
+    role = await get_role_by_code(role_codes[0]) if role_codes else None
+    return SuccessResponse(
+        data={
+            "id": current_user.id,
+            "username": current_user.username,
+            "nickname": current_user.nickname,
+            "avatar": current_user.avatar,
+            "gender": current_user.gender,
+            "mobile": current_user.mobile,
+            "email": current_user.email,
+            "roleNames": (role.description or role.name) if role else "",
+            "createTime": current_user.created_at,
+        }
+    )
 
 
-# 用户表单数据
-@router.get("/{user_id}/form", response_model=SuccessResponse, summary="通过用户id查询用户信息",
-            dependencies=[Depends(get_current_user)])
-async def root(user_id: int):
-    user = get_user_by_id(user_id)
-    role_names = await get_role_name_by_user_id(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return SuccessResponse(data={
-        **user.dict(exclude={"password"}),  # 排除密码字段
-        "roleIds": role_names
-    })
-
-
-# 更新用户信息
-@router.put("/{user_id}", response_model=SuccessResponse, summary="更新用户全部信息",
-            dependencies=[Depends(get_current_user)])
-async def update_user(user: UserUpdate = Body(...)):
-    user = await update_user_info(user)
-    if user:
-        return SuccessResponse()
-    raise HTTPException(status_code=404, detail="用户不存在")
-
-
-# 获取个人中心用户信息
-@router.get("/profile", response_model=SuccessResponse, summary="获取个人中心用户信息",
-            dependencies=[Depends(get_current_user)])
-async def root(current_user=Depends(get_current_user)):
-    roles = await get_user_roles_codes(current_user.id)
-    role_info = await get_role_by_code(roles[0])
-    perms = await get_user_perm_codes(current_user.id)
-    return SuccessResponse(data={
-        "id": current_user.id,
-        "username": current_user.username,
-        "nickname": current_user.nickname,
-        "avatar": current_user.avatar,
-        "gender": 1,
-        "mobile": "",
-        "email": current_user.email,
-        "deptName": "管理中心",
-        "roleNames": role_info.description or role_info.name,
-        "createTime": current_user.created_at,
-    })
-
-
-# 个人中心修改用户信息
-@router.put("/profile", summary="个人中心修改用户信息", dependencies=[Depends(get_current_user)])
-async def root(user: UserUpdate = Body(...), current_user=Depends(get_current_user)):
-    user.id = current_user.user_id
-    new_user = UserUpdate(**user.dict())
-    result = await update_user_info(new_user)
-    if not result:
-        raise HTTPException(status_code=500, detail="修改失败")
+@router.put("/profile", response_model=SuccessResponse, summary="更新个人资料")
+async def update_profile(data: UserUpdate, current_user=Depends(get_current_user)):
+    data.id = current_user.id
+    if not await update_user_info(data):
+        raise HTTPException(status_code=500, detail="更新个人资料失败")
     return SuccessResponse()
 
 
-# 修改密码
-@router.put("/password", summary="修改密码", dependencies=[Depends(get_current_user)])
-async def root(password: PasswordUpdate = Body(...), current_user=Depends(get_current_user)):
-    result = await update_user_password(password, current_user.user_id)
-    if not result:
-        raise HTTPException(status_code=500, detail="修改失败")
-    elif result == PasswordStatus.success:
-        return SuccessResponse()
-    elif result == PasswordStatus.samePasswordError:
-        raise HTTPException(status_code=500, detail="新密码不能与旧密码相同")
-    elif result == PasswordStatus.oldPasswordError:
-        raise HTTPException(status_code=500, detail="旧密码错误")
-    elif result == PasswordStatus.newPasswordError:
-        raise HTTPException(status_code=500, detail="新密码格式错误")
-    else:
-        raise HTTPException(status_code=500, detail="修改失败")
+@router.put("/password", response_model=SuccessResponse, summary="修改个人密码")
+async def change_password(data: PasswordUpdate, current_user=Depends(get_current_user)):
+    status = await update_user_password(data, current_user.id)
+    messages = {
+        PasswordStatus.oldPasswordError: "原密码错误",
+        PasswordStatus.newPasswordError: "新密码不能为空",
+        PasswordStatus.samePasswordError: "新密码不能与原密码相同",
+    }
+    if status != PasswordStatus.success:
+        raise HTTPException(status_code=400, detail=messages.get(status, "密码修改失败"))
+    return SuccessResponse()
 
 
-# 发送邮箱验证码（绑定或更换邮箱）
-@router.post("/email/code", summary="发送邮箱验证码（绑定或更换邮箱）", dependencies=[Depends(get_current_user)])
-async def root(email: str, background_tasks: BackgroundTasks, current_user=Depends(get_current_user)):
-    background_tasks.add_task(clean_email_code)
+@router.post("/email/code", response_model=SuccessResponse, summary="发送邮箱验证码")
+async def email_code(email: str, background_tasks: BackgroundTasks, current_user=Depends(get_current_user)):
     if not check_email(email):
-        raise HTTPException(status_code=400, detail="邮箱格式错误")
-    if current_user.email == email:
-        raise HTTPException(status_code=400, detail="邮箱已绑定")
-    result = await send_email_code(email, current_user.user_id)
+        raise HTTPException(status_code=422, detail="邮箱格式不正确")
+    background_tasks.add_task(clean_email_code)
+    result = await send_email_code(email, current_user.id)
     if result == SendStatus.exist:
-        raise HTTPException(status_code=400, detail="邮箱已存在")
-    elif result == SendStatus.error:
-        raise HTTPException(status_code=500, detail="发送失败")
-    elif result == SendStatus.success:
-        return SuccessResponse()
-    else:
-        raise HTTPException(status_code=500, detail="发送失败")
+        raise HTTPException(status_code=409, detail="验证码仍在有效期内")
+    if result != SendStatus.success:
+        raise HTTPException(status_code=500, detail="发送验证码失败")
+    return SuccessResponse()
 
 
-# 绑定或更换邮箱
-@router.put("/email", summary="绑定或更换邮箱", dependencies=[Depends(get_current_user)])
-async def root(email: EmailUpdate = Body(...), current_user=Depends(get_current_user)):
-    if not check_email(email.email):
-        raise HTTPException(status_code=400, detail="邮箱格式错误")
-    if not email.code:
-        raise HTTPException(status_code=400, detail="验证码不能为空")
-    email_res = get_code_by_email(email.email)
-    if not email_res:
-        raise HTTPException(status_code=500, detail="修改失败")
-    if email_res.code != email.code:
-        raise HTTPException(status_code=400, detail="验证码错误")
-    if email_res.expire_time < datetime.now():
-        raise HTTPException(status_code=400, detail="验证码已过期")
-    info = UserUpdate(id=current_user.user_id, email=email.email)
-    result = await update_user_info(info)
-    if not result:
-        raise HTTPException(status_code=500, detail="修改失败")
-    else:
-        return SuccessResponse()
+@router.put("/email", response_model=SuccessResponse, summary="绑定邮箱")
+async def bind_email(data: EmailUpdate, current_user=Depends(get_current_user)):
+    record = get_code_by_email(data.email)
+    if not record or record.user_id != current_user.id:
+        raise HTTPException(status_code=400, detail="验证码无效")
+    if record.code != data.code or record.expire_time < datetime.now():
+        raise HTTPException(status_code=400, detail="验证码错误或已过期")
+    if not await update_user_info(UserUpdate(id=current_user.id, email=data.email)):
+        raise HTTPException(status_code=500, detail="邮箱更新失败")
+    return SuccessResponse()
 
 
-# 获取用户分页列表
-@router.get("/page", summary="获取用户分页列表", dependencies=[Depends(get_current_user)])
-async def root(queryUser: QueryUserPage = Query(...), current_user=Depends(get_current_user)):
-    if queryUser.pageSize < 1:
-        raise HTTPException(status_code=400, detail="页码不能小于1")
-    if queryUser.pageNum < 1:
-        raise HTTPException(status_code=400, detail="每页数量不能小于1")
-    result = await get_users_page(queryUser)
-    if not result:
-        raise HTTPException(status_code=500, detail="获取失败")
-    else:
-        return PaginationResponse(data=PageData(
-            total=result[0],
-            list=result[1]
-        ))
+@router.get("/page", response_model=PaginationResponse, summary="用户分页")
+async def list_users(query: QueryUserPage = Query(...), current_user=Depends(require_admin)):
+    if query.pageNum < 1 or not 1 <= query.pageSize <= 100:
+        raise HTTPException(status_code=422, detail="分页参数无效")
+    total, users = await get_users_page(query)
+    return PaginationResponse(data=PageData(total=total, list=users))
 
 
-# 新增用户
-@router.post("", summary="新增用户", dependencies=[Depends(get_current_user)])
-async def root(user: UserCreate, current_user=Depends(get_current_user)):
-    result = await create_user(user)
-    if not result:
-        raise HTTPException(status_code=500, detail="新增失败")
-    else:
-        return SuccessResponse()
+@router.post("", response_model=SuccessResponse, summary="新增用户")
+async def add_user(data: UserCreate, current_user=Depends(require_admin)):
+    user = await create_user(data)
+    if not user:
+        raise HTTPException(status_code=409, detail="用户名已存在")
+    return SuccessResponse(data=user)
 
 
-# 删除用户
-@router.delete("/{user_id}", summary="删除用户", dependencies=[Depends(get_current_user)],
-               description="用户ID列表，逗号分隔，如 1 或 2,3,4")
-async def root(user_id: str):
-    user_id_list = str_to_int_list(user_id)
-    result = await delete_users(user_id_list)
-    if not result:
-        raise HTTPException(status_code=500, detail="删除失败")
-    else:
-        return SuccessResponse()
+@router.get("/userinfo/{username}", response_model=SuccessResponse, summary="用户信息")
+async def user_by_name(username: str, current_user=Depends(require_admin)):
+    user = get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse(data={"id": user.id, "username": user.username, "email": user.email})
 
 
-# 重置用户密码
-@router.put("/{user_id}/password/reset", summary="重置用户密码", dependencies=[Depends(get_current_user)])
-async def root(user_id: int, password: str):
-    result = await reset_password(user_id, password)
-    if not result:
-        raise HTTPException(status_code=500, detail="重置失败")
-    else:
-        return SuccessResponse()
+@router.get("/{user_id}/form", response_model=SuccessResponse, summary="用户详情")
+async def user_form(user_id: int, current_user=Depends(require_admin)):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse(
+        data={
+            "id": user.id,
+            "username": user.username,
+            "nickname": user.nickname,
+            "avatar": user.avatar,
+            "gender": user.gender,
+            "mobile": user.mobile,
+            "email": user.email,
+            "status": user.status,
+            "roleIds": await get_user_role_ids(user_id),
+        }
+    )
+
+
+@router.put("/{user_id}", response_model=SuccessResponse, summary="更新用户")
+async def edit_user(user_id: int, data: UserUpdate, current_user=Depends(require_admin)):
+    data.id = user_id
+    if not await update_user_info(data):
+        raise HTTPException(status_code=404, detail="用户不存在")
+    return SuccessResponse()
+
+
+@router.put("/{user_id}/password/reset", response_model=SuccessResponse, summary="重置用户密码")
+async def reset_user_password(user_id: int, password: str, current_user=Depends(require_admin)):
+    if not await reset_password(user_id, password):
+        raise HTTPException(status_code=400, detail="重置密码失败")
+    return SuccessResponse()
+
+
+@router.delete("/{user_ids}", response_model=SuccessResponse, summary="删除用户")
+async def remove_users(user_ids: str, current_user=Depends(require_admin)):
+    if not await delete_users(str_to_int_list(user_ids)):
+        raise HTTPException(status_code=409, detail="系统管理员不能删除")
+    return SuccessResponse()
